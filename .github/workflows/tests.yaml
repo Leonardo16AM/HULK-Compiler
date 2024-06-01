@@ -5,17 +5,24 @@ on:
 
 jobs:
   build-and-run:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up Make
-      run: sudo apt-get update && sudo apt-get install -y make
+    - name: Set up MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        install: >-
+          base-devel
+          mingw-w64-x86_64-gcc
+        update: true
 
     - name: Build with Make
+      shell: msys2 {0}
       run: make
 
     - name: Run Hulk
+      shell: msys2 {0}
       run: ./hulk
