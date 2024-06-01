@@ -23,10 +23,6 @@ jobs:
       shell: msys2 {0}
       run: make
 
-    - name: List directory
-      shell: msys2 {0}
-      run: ls -la
-
     - name: Run Hulk
       shell: msys2 {0}
-      run: ./hulk
+      run: ./hulk.exe
