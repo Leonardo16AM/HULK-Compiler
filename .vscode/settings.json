@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.tsz": "sql",
+        "ostream": "cpp",
+        "iostream": "cpp"
+    }
+}
