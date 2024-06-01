@@ -1,0 +1,21 @@
+name: Build and Run
+
+on:
+  push: {}
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Make
+      run: sudo apt-get update && sudo apt-get install -y make
+
+    - name: Build with Make
+      run: make
+
+    - name: Run Hulk
+      run: ./hulk

@@ -7,7 +7,6 @@
 #include "backbone_test.h"
 
 
-
 bool testbackbone(){
 
     token t1 = token("value", 1, 1, "type");
