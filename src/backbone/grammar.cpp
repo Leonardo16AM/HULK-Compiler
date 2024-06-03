@@ -2,7 +2,7 @@
 #include <stdexcept>
 
 grammar::grammar(){
-    terminals.insert(EOFToken());
+    terminals.insert(EOF_token());
 }
 
 grammar_production grammar::get_production(int ind) const {
@@ -93,13 +93,13 @@ void grammar::calculate_first() {
                         changed = true;
                     }
                 }
-                if (firsts[token].find(EOFToken()) == firsts[token].end()) {
+                if (firsts[token].find(EOF_token()) == firsts[token].end()) {
                     all_epsilon = false;
                     break;
                 }
             }
             if (all_epsilon) {
-                if (firsts[head].insert(EOFToken()).second) {
+                if (firsts[head].insert(EOF_token()).second) {
                     changed = true;
                 }
             }
@@ -115,14 +115,14 @@ std::set<grammar_token> grammar::calculate_sentence_first(const std::vector<gram
         for (const auto &first : firsts.at(token)) {
             result.insert(first);
         }
-        if (firsts.at(token).find(EOFToken()) == firsts.at(token).end()) {
+        if (firsts.at(token).find(EOF_token()) == firsts.at(token).end()) {
             all_epsilon = false;
             break;
         }
     }
 
     if (all_epsilon) {
-        result.insert(EOFToken());
+        result.insert(EOF_token());
     }
 
     return result;
@@ -135,7 +135,7 @@ void grammar::calculate_follow() {
         follows[non_terminal] = {};
     }
 
-    follows[*non_terminals.begin()].insert(EOFToken());
+    follows[*non_terminals.begin()].insert(EOF_token());
 
     bool changed = true;
     while (changed) {
@@ -152,12 +152,12 @@ void grammar::calculate_follow() {
 
                 auto firsts = calculate_sentence_first({body.begin() + i + 1, body.end()});
                 for (const auto &first : firsts) {
-                    if (first != EOFToken() && follows[token].insert(first).second) {
+                    if (first != EOF_token() && follows[token].insert(first).second) {
                         changed = true;
                     }
                 }
 
-                if (firsts.find(EOFToken()) != firsts.end() || i == body.size() - 1) {
+                if (firsts.find(EOF_token()) != firsts.end() || i == body.size() - 1) {
                     for (const auto &follow : follows[head]) {
                         if (follows[token].insert(follow).second) {
                             changed = true;

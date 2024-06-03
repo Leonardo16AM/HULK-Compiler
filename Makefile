@@ -1,31 +1,31 @@
-# Nombre del compilador
-CXX = g++
+# Define el compilador
+CXX := g++
+# Define los flags de compilación
+CXXFLAGS := -Wall -g -std=c++17
 
-# Opciones de compilación
-CXXFLAGS = -Wall -std=c++11 -Iinclude
+# Directorio fuente
+SRC_DIR := src/backbone
 
-# Archivos fuente
-SOURCES = src/main.cpp src/backbone/token.cpp src/backbone/lexer_out.cpp src/tests/backbone_test.cpp
+# Archivos fuente adicionales y encontrados recursivamente
+SOURCES = src/main.cpp src/tests/backbone_test.cpp src/backbone/lexer_token.cpp src/backbone/lexer_out.cpp src/backbone/grammar_token.cpp src/backbone/grammar.cpp src/backbone/grammar_production.cpp src/backbone/derivation_tree.cpp src/backbone/attributed_rule.cpp src/backbone/attributed_grammar.cpp src/backbone/parse_result.cpp
 
-# Archivos objeto
-OBJECTS = $(SOURCES:.cpp=.o)
+# Reemplaza la extensión .cpp por .o para obtener los nombres de los objetos
+OBJECTS := $(SOURCES:.cpp=.o)
 
-# Nombre del ejecutable
-EXECUTABLE = hulk
+# Nombre del ejecutable final
+TARGET := my_program
 
 # Regla principal
-all: $(EXECUTABLE)
+all: $(TARGET)
 
-# Regla para construir el ejecutable
-$(EXECUTABLE): $(OBJECTS)
+# Regla para compilar el ejecutable
+$(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-# Regla para compilar los archivos objeto
+# Regla para compilar cada archivo .cpp en un archivo .o
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-# Limpiar archivos generados
+# Limpiar los archivos compilados
 clean:
-	rm -f $(OBJECTS) $(EXECUTABLE)
-
-.PHONY: all clean
+	rm -f $(OBJECTS) $(TARGET)

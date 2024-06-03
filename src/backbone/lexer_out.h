@@ -2,21 +2,21 @@
 #define LEXER_OUT_H
 
 #include <vector>
-#include "token.h"
+#include "lexer_token.h"
 #include "error.h"
 
 class lexer_out{
     public:
     bool ok;
-    std::vector<token> tokens;
+    std::vector<lexer_token> lexer_tokens;
     error* err;
 
     lexer_out();
-    lexer_out(std::vector<token> tokens);
+    lexer_out(std::vector<lexer_token> lexer_tokens);
     lexer_out(error* e);
     ~lexer_out();
 
-    token operator[](int index);
+    lexer_token operator[](int index);
     int size();
 };
 
