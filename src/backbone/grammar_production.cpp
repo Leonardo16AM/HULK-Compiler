@@ -1,10 +1,16 @@
 #include "grammar_production.h"
+#include <cstring>
 
 grammar_production::grammar_production(int ind, const grammar_token &head, const std::vector<grammar_token> &body)
     : head(head), body(body), ind(ind) {}
 
 bool grammar_production::operator==(const grammar_production &other) const {
-    return to_string() == other.to_string();
+    return strcmp(to_string().c_str(), other.to_string().c_str()) == 0;
+}
+
+
+bool grammar_production::operator!=(const grammar_production &other) const {
+    return strcmp(to_string().c_str(), other.to_string().c_str()) != 0;
 }
 
 std::string grammar_production::to_string() const {
