@@ -11,6 +11,9 @@ public:
     grammar_token();
     grammar_token(const std::string& value, bool is_terminal = false, bool is_main = false);
     bool operator==(const grammar_token& other) const;
+    bool operator!=(const grammar_token& other) const;
+    bool operator<(const grammar_token& other) const;
+
     std::size_t hash() const;
     std::string to_string() const;
 

@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include <memory>
+#include <variant>
 
 template <typename T1, typename T2>
 class attributed_rule {

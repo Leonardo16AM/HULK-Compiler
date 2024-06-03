@@ -1,4 +1,6 @@
 #include "parse_result.h"
+#include <algorithm>
+
 
 parse_result::parse_result(const std::vector<grammar_production> &derivations, int error)
     : ok(error == -1), error(error), tree(ok ? build_tree(derivations) : nullptr) {}

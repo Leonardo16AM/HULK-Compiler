@@ -4,14 +4,14 @@ grammar_production::grammar_production(int ind, const grammar_token &head, const
     : head(head), body(body), ind(ind) {}
 
 bool grammar_production::operator==(const grammar_production &other) const {
-    return toString() == other.toString();
+    return to_string() == other.to_string();
 }
 
-std::string grammar_production::toString() const {
-    std::string value = head.toString() + " -> ";
+std::string grammar_production::to_string() const {
+    std::string value = head.to_string() + " -> ";
 
     for (const auto &v : body) {
-        value += v.toString() + " ";
+        value += v.to_string() + " ";
     }
 
     return value;

@@ -3,6 +3,7 @@
         "*.tsz": "sql",
         "ostream": "cpp",
         "iostream": "cpp",
-        "memory": "cpp"
+        "memory": "cpp",
+        "string": "cpp"
     }
 }

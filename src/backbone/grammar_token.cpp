@@ -11,6 +11,14 @@ bool grammar_token::operator==(const grammar_token& other) const {
     return value == other.value;
 }
 
+bool grammar_token::operator<(const grammar_token& other) const {
+    return value < other.value;
+}
+
+bool grammar_token::operator!=(const grammar_token& other) const {
+    return value != other.value;
+}
+
 std::size_t grammar_token::hash() const {
     return std::hash<std::string>()(value);
 }
