@@ -2,24 +2,24 @@
 #include <string>
 
 #include "../backbone/error.h"
-#include "../backbone/token.h"
+#include "../backbone/lexer_token.h"
 #include "../backbone/lexer_out.h"
 #include "backbone_test.h"
 
 
 bool testbackbone(){
 
-    token t1 = token("value", 1, 1, "type");
-    token t2 = token("value", 1, 1, "type");
-    token t3 = token("value", 1, 1, "type2");
+    lexer_token t1 = lexer_token("value", 1, 1, "type");
+    lexer_token t2 = lexer_token("value", 1, 1, "type");
+    lexer_token t3 = lexer_token("value", 1, 1, "type2");
 
     if(!(t1 == t2)){
-        std::cout << "Token comparison failed" << std::endl;
+        std::cout << "lexer_Token comparison failed" << std::endl;
         return false;
     }
 
     if(t1 == t3){
-        std::cout << "Token comparison failed" << std::endl;
+        std::cout << "lexer_Token comparison failed" << std::endl;
         return false;
     }
 

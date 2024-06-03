@@ -1,11 +1,14 @@
-# Nombre del compilador
-CXX = g++
+# Define el compilador
+CXX := g++
 
-# Opciones de compilación
-CXXFLAGS = -Wall -std=c++11 -Iinclude
+# Define los flags de compilación
+CXXFLAGS := -Wall -g -std=c++17 -Iinclude -Isrc -Isrc/backbone -Isrc/tests
 
-# Archivos fuente
-SOURCES = src/main.cpp src/backbone/token.cpp src/backbone/lexer_out.cpp src/tests/backbone_test.cpp
+# Directorio fuente
+SRC_DIR := src/backbone
+
+# Archivos fuente adicionales y encontrados recursivamente
+SOURCES = src/main.cpp src/tests/backbone_test.cpp src/backbone/lexer_token.cpp src/backbone/lexer_out.cpp src/backbone/grammar_token.cpp src/backbone/grammar.cpp src/backbone/grammar_production.cpp src/backbone/derivation_tree.cpp src/backbone/attributed_grammar.cpp src/backbone/parse_result.cpp
 
 # Archivos objeto
 OBJECTS = $(SOURCES:.cpp=.o)

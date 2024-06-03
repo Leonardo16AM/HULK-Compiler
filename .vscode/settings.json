@@ -2,6 +2,8 @@
     "files.associations": {
         "*.tsz": "sql",
         "ostream": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "memory": "cpp",
+        "string": "cpp"
     }
 }

@@ -2,19 +2,19 @@
 
 lexer_out::lexer_out(){
     this->ok = true;
-    this->tokens = {};
+    this->lexer_tokens = {};
     this->err = nullptr;
 }
 
-lexer_out::lexer_out(std::vector<token> tokens){
+lexer_out::lexer_out(std::vector<lexer_token> lexer_tokens){
     this->ok = true;
-    this->tokens = tokens;
+    this->lexer_tokens = lexer_tokens;
     this->err = nullptr;
 }
 
 lexer_out::lexer_out(error* e){
     this->ok = false;
-    this->tokens = {};
+    this->lexer_tokens = {};
     this->err = e;
 }
 
@@ -24,10 +24,10 @@ lexer_out::~lexer_out(){
     }
 }
 
-token lexer_out::operator[](int index){
-    return this->tokens[index];
+lexer_token lexer_out::operator[](int index){
+    return this->lexer_tokens[index];
 }
 
 int lexer_out::size(){
-    return this->tokens.size();
+    return this->lexer_tokens.size();
 }

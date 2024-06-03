@@ -1,5 +1,6 @@
 #include <iostream>
 #include "tests/backbone_test.h"
+#include "backbone/attributed_rule.h"
 
 int main(){
     std::cout<<"Compilation started"<<std::endl;
