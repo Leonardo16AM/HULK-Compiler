@@ -1,23 +1,23 @@
-#include "token.h"
+#include "lexer_token.h"
 
-token::token(){
+lexer_token::lexer_token(){
     this->value = "";
     this->row = 0;
     this->col = 0;
     this->type = "";
 }
 
-token::token(std::string val, int r, int c, std::string typ){
+lexer_token::lexer_token(std::string val, int r, int c, std::string typ){
     this->value = val;
     this->row = r;
     this->col = c;
     this->type = typ;
 }
 
-bool token::operator==(const token& other){
+bool lexer_token::operator==(const lexer_token& other){
     return this->type == other.type;
 }
 
-bool token::operator!=(const token& other){
+bool lexer_token::operator!=(const lexer_token& other){
     return this->type != other.type;
 }
