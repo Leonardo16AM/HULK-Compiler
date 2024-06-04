@@ -9,6 +9,7 @@ class grammar_production {
 public:
     grammar_production(int ind, const grammar_token &head, const std::vector<grammar_token> &body);
     bool operator==(const grammar_production &other) const;
+    bool operator!=(const grammar_production &other) const;
     std::string to_string() const;
     std::size_t hash() const;
 

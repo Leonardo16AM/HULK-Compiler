@@ -1,5 +1,6 @@
 #include "grammar.h"
 #include <stdexcept>
+#include <cstring>
 
 grammar::grammar(){
     terminals.insert(EOF_token());
@@ -15,12 +16,12 @@ std::set<grammar_token>::iterator grammar::get_tokens() {
 
 grammar_token grammar::get_token(const std::string &value) const {
     for (const auto &t : non_terminals) {
-        if (t.value == value) {
+        if (strcmp(t.value.c_str(), value.c_str()) == 0){
             return t;
         }
     }
     for (const auto &t : terminals) {
-        if (t.value == value) {
+        if (strcmp(t.value.c_str(), value.c_str()) == 0) {
             return t;
         }
     }
@@ -41,7 +42,7 @@ void grammar::add_production(const std::string &non_terminal, const std::vector<
         } else {
             non_terminals.insert(token);
         }
-        if (token == main) {
+        if (strcmp(t.c_str(), main.value.c_str()) == 0){
             token = main;
         }
         return token;
@@ -57,10 +58,9 @@ void grammar::add_production(const std::string &non_terminal, const std::vector<
         std::vector<grammar_token> body;
         size_t start = 0;
         size_t end = sentence.find(' ');
-
         while (end != std::string::npos) {
             std::string token = sentence.substr(start, end - start);
-            if (!token.empty() && token != "EOF") {
+            if (!token.empty() && strcmp(token.c_str(), "EOF") != 0){
                 body.push_back(get(token));
             }
             start = end + 1;
