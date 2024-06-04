@@ -1,3 +1,6 @@
+#ifndef REGEX_LEXER_H
+#define REGEX_LEXER_H
+
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -7,7 +10,7 @@
 #include "regex_grammar.h"
 #include "../backbone/error.h"
 
-regex_out lexer(const std::string &text) {
+regex_out<std::vector<regex_token>> regex_lexer(const std::string &text) {
     std::vector<regex_token> result;
     bool scape = false;
 
@@ -21,7 +24,7 @@ regex_out lexer(const std::string &text) {
 
         if (text[i] == '\\') {
             if (i + 1 == text.size()) {
-                return regex_out({},error("Invalid character \\: pos " + std::to_string(i),0, i));
+                return regex_out<std::vector<regex_token>>({},error("Invalid character \\: pos " + std::to_string(i),0, i));
             } else {
                 result.push_back(regex_token( ti , (int)i+1,false));
             }
@@ -34,5 +37,6 @@ regex_out lexer(const std::string &text) {
         result.push_back(regex_token(ti, i, std::find(regex_special_tokens.begin(), regex_special_tokens.end(), text[i]) != regex_special_tokens.end()));
     }
 
-    return regex_out(result,error(""));
+    return regex_out<std::vector<regex_token>>(result,error(""));
 }
+#endif
