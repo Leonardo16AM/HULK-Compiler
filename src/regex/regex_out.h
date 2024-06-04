@@ -7,13 +7,15 @@
 #include "../backbone/error.h"
 #include "regex_token.h"
 
+
+template<class T>
 class regex_out{
 public:
-    std::vector<regex_token> value;
+    T value;
     bool ok;
     error err;
 
-    regex_out(std::vector<regex_token> value = {}, error e=error("")) : value(value), ok(value.size()!=0), err(e) {}
+    regex_out(T val, error e=error("")) : value(val), ok(e.message().size()==0?true:false), err(e) {}
 };
 
 #endif

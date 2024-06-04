@@ -17,7 +17,7 @@ bool regex_test(){
 
     std::string regex="( |\n|\t)+|//[^\n]*\n|/\*([^\*]|\*[^/])*(\*/|\*\*/)";
 
-    regex_out out = lexer(regex);
+    regex_out out = regex_lexer(regex);
 
     if(!out.ok){
         std::cout << "Lexer failed" << std::endl;
