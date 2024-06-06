@@ -1,6 +1,7 @@
 #include <iostream>
 #include "tests/backbone_test.h"
 #include "tests/regex_test.h"
+#include "tests/automaton_test.h"
 #include "backbone/attributed_rule.h"
 
 int main(){
@@ -13,6 +14,10 @@ int main(){
     
     if(!regex_test()){
         std::cout<<"REGEX Test failed"<<std::endl;
+    }
+    
+    if(!automaton_test()){
+        std::cout<<"AUTOMATON Test failed"<<std::endl;
     }
 
 
