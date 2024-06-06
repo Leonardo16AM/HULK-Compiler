@@ -74,5 +74,47 @@ bool automaton_test(){
     a.add_complement(std::make_shared<state>(5), std::make_shared<state>(24));
 
 
+
+    std::shared_ptr<automaton> autom= pattern_to_automaton("leonardo");
+    autom->add_final_state(autom->states[3]);
+
+    std::cout<<"Match leo: "<<autom->match("leo")<<std::endl;
+    std::cout<<"Match leonardo: "<<autom->match("leonardo")<<std::endl;
+    std::cout<<"Match leonard: "<<autom->match("leonard")<<std::endl;
+
+
+    std::cout<<"Number of states :"<<autom->states.size()<<std::endl;
+    for(auto s: autom->states){
+        std::cout<<"State "<<s->ind<<std::endl;
+    
+        for(auto t: s->transitions){
+                std::cout<<"Transition "<<t.first<<" "<<t.second->ind<<std::endl;
+        }
+        for(auto t: s->eof_transitions){
+                std::cout<<"Eof Transition "<<t->ind<<std::endl;
+        }
+    }
+    // export automaton to json
+
+    nlohmann::json j = autom->to_json();
+    std::ofstream o("automaton.json");
+    o << j << std::endl;
+    o.close();
+
+    //create a new automaton loaded from the json
+
+    std::ifstream i("automaton.json");
+    nlohmann::json j2;
+    i >> j2;
+    i.close();
+
+    std::shared_ptr<automaton> autom2 = std::make_shared<automaton>();
+    autom2->from_json(j2);
+
+    std::cout<<"Match leo: "<<autom2->match("leo")<<std::endl;
+    std::cout<<"Match leonardo: "<<autom2->match("leonardo")<<std::endl;
+    std::cout<<"Match leonard: "<<autom2->match("leonard")<<std::endl;
+    
+
     return true;
 }
