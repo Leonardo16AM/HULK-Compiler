@@ -1,13 +1,20 @@
 import cmp.visitor as visitor
 
+#region Node
 class Node:
     def evaluate(self):
         raise NotImplementedError()
 
+
+
+#region AtomicNode
 class AtomicNode(Node):
     def __init__(self, lex):
         self.lex = lex
 
+
+
+#region UnaryNode
 class UnaryNode(Node):
     def __init__(self, node):
         self.node = node
@@ -20,6 +27,7 @@ class UnaryNode(Node):
     def operate(value):
         raise NotImplementedError()
 
+#region BinaryNode
 class BinaryNode(Node):
     def __init__(self, left, right):
         self.left = left
@@ -34,6 +42,7 @@ class BinaryNode(Node):
     def operate(lvalue, rvalue):
         raise NotImplementedError()
 
+#region get_printer
 def get_printer(AtomicNode=AtomicNode, UnaryNode=UnaryNode, BinaryNode=BinaryNode, ):
 
     class PrintVisitor(object):

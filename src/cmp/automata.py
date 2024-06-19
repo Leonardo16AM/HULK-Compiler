@@ -3,6 +3,7 @@ try:
 except:
     pass
 
+#region State
 class State:
     def __init__(self, state, final=False, formatter=lambda x: str(x), shape='circle'):
         self.state = state
@@ -197,9 +198,17 @@ class State:
     def write_to(self, fname):
         return self.graph().write_svg(fname)
 
+
+
+
+#region multiline_formatter
 def multiline_formatter(state):
     return '\n'.join(str(item) for item in state)
 
+
+
+
+#region lr0_formatter
 def lr0_formatter(state):
     try:
         return '\n'.join(str(item)[:-4] for item in state)
