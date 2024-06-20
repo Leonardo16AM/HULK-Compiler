@@ -2,6 +2,7 @@ try:
     import pydot
 except:
     pass
+from PIL import Image
 
 #region State
 class State:
@@ -175,7 +176,7 @@ class State:
             ids = id(start)
             if ids not in visited:
                 visited.add(ids)
-                G.add_node(pydot.Node(ids, label=start.name, shape=self.shape, style='bold' if start.final else ''))
+                G.add_node(pydot.Node(ids, label=f"{start.name}  {start.tag}", shape=self.shape, style='bold' if start.final else ''))
                 for tran, destinations in start.transitions.items():
                     for end in destinations:
                         visit(end)
@@ -188,6 +189,13 @@ class State:
         G.add_edge(pydot.Edge('start', id(self), label='', style='dashed'))
 
         return G
+    
+    def plot(self,show=True):
+        pydot_graph = self.graph()
+        pydot_graph.write_png('automaton.png')
+        if show:
+            img = Image.open('automaton.png')
+            img.show()
 
     def _repr_svg_(self):
         try:

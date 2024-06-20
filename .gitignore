@@ -2,6 +2,7 @@
 *.exe
 *.json
 *.pyc
+*.png
 test.ipynb
 
 src/cmp/tools/*
