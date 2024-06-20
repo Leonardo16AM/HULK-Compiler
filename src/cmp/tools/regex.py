@@ -1,3 +1,86 @@
-import zlib, base64
-exec(zlib.decompress(base64.b64decode('eJytVsFu2zgQvesreFhDVE0IdY8BCNTZtVRg2yyaOKgdwxAYiYrZSKRK0qnttp+1v7HftCQlWbLWTXPYgwzyzXDem9Fw5FyKEqRlFRKlASsrITWYalGy9EpkFF0yTuTeLW/blZe3Z6p9KsqKFVS2R2NJypLIzkULUaiQbE1IoknjBv+IpujKPC2epIVQW0l7gOAp0ZQTzQTv4JJxVrLDAN1yu+U5SbRIspwEQ376RIqtO9QKbRCaVEQqOvS3IOMPrXNJtchEUkmasVSzJ5FwkUiabo3Xk+gObzUrVHtoLh4p975gk6uXFkQpMKsUKwS3NYRdjYMLD2Q0PyqCiha5BYGkeis5+AKVNrjCE5Sb11EovHq9RloSrphNSeFvPwJP4l74hvBmX96L4sV8CttlWNDdGfI3R/LJgBy+Riq4mBgNKe4YGwm/1y/WaTh2kGV7a+Oy1JR2I7JakaiotIKsMNqvwLBNGg/vI+6FbwhvbS84uq53f8FXuHBI/pzXNdjAz7vGR642Wde0/zf5yVUYiogi3LF6NrCkD3RnLoLpPnagEmq60yhG6pFVydcNM++yIql5oXNZ823wau2BOMbfdheuZ+EOxavdOsiFBDvA+Mr/7iP/lXmgeQLz/PO3v/7hAetwMA7AUljlLAdDGkB4Bg4hU24LXYLAZKQZ31Kz1nLvoM84jlcHIwTQXUorDf6k+5mUQjbWWtnBKPOV6zF/HRiL68miDrEJSVVRnsHPxnLc1Af933wUh7O/osDYmgJvXLnut6zIkod6bjl9MY7bnQdmOA6vBJ9TWVoq6M985CrngTmK0BQt0BLdnTop6M9BBKZgAZbgzjeuFfqAbtAlIujWuPb8voNXAIIA1DkBU1jLOcLz8QIVpLzPCNggdaFWb9bIMNBTcGLqtRjhajzr49dwYweEPRM4u0m8Hg19L+tjchjhaLx8IdXS6OqjUdQyTSzT8lmmaISn47sXMt2N8Ic++tERBc7wDMd0hEkfTWEjzRhu+wbZM9yMZ+PLoa5jk8RejAct4r3Hz38QYBw0A+Ha3sVm3iaJ+XbpJHHzFrlb+t9LGZmuqKfAJzeM7SJ0vtj9un0zGQTHn8Ja2xGBzitoGVNzOVpGe0lPIzcp9gIaqlQ82LnhxkZwdnKdpXwulQ0ezqT6yJmhVB+yFxu/hxu7mOPTTzXMkcPf4Xl4/IRZYIG7PwDwnUUe8dn/DXARdMk/ev8C0IsPHg==')))
-# Created by pyminifier (https://github.com/liftoff/pyminifier)
+from src.cmp.ast import AtomicNode,BinaryNode,UnaryNode
+from src.cmp.pycompiler import Grammar
+from src.cmp.tools.automata import(DFA,NFA,automata_closure,automata_concatenation,automata_minimization,automata_union,nfa_to_dfa)
+from src.cmp.tools.evaluation import evaluate_parse
+from src.cmp.tools.parsing import metodo_predictivo_no_recursivo
+from src.cmp.utils import Token
+
+#region RegexNodes
+q=DFA
+class EpsilonNode(AtomicNode):
+ def evaluate(self):
+  return q(states=1,finals=[0],transitions={})
+r=EpsilonNode
+class SymbolNode(AtomicNode):
+ def evaluate(self):
+  s=self.lex
+  return q(states=2,finals=[1],transitions={(0,s):1})
+c=SymbolNode
+class ClosureNode(UnaryNode):
+ @staticmethod
+ def operate(value):
+  return automata_closure(value)
+Q=ClosureNode
+class UnionNode(BinaryNode):
+ @staticmethod
+ def operate(lvalue,rvalue):
+  return automata_union(lvalue,rvalue)
+R=UnionNode
+class ConcatNode(BinaryNode):
+ @staticmethod
+ def operate(lvalue,rvalue):
+  return automata_concatenation(lvalue,rvalue)
+FF=ConcatNode
+def regex_tokenizer(text,G,skip_whitespaces=True):
+ h=[]
+ GG={x:Token(x,G[x])for x in['|','*','(',')','ε']}
+ for z in text:
+  if skip_whitespaces and z.isspace():
+   continue
+  try:
+   j=GG[z]
+  except KeyError:
+   j=Token(z,G['symbol'])
+  finally:
+   h.append(j)
+ h.append(Token('$',G.EOF))
+ return h
+def build_grammar():
+ G=Grammar()
+ E=G.NonTerminal('E',True)
+ T,F,A,X,Y,Z=G.NonTerminals('T F A X Y Z')
+ p,M,S,B,a,U=G.Terminals('| * ( ) symbol ε')
+ E%=T+X,lambda h,s:s[2],None,lambda h,s:s[1]
+ X%=p+E,lambda h,s:R(h[0],s[2])
+ X%=G.Epsilon,lambda h,s:h[0]
+ T%=F+Y,lambda h,s:s[2],None,lambda h,s:s[1]
+ Y%=T,lambda h,s:FF(h[0],s[1])
+ Y%=G.Epsilon,lambda h,s:h[0]
+ F%=A+Z,lambda h,s:s[2],None,lambda h,s:s[1]
+ Z%=M,lambda h,s:Q(h[0])
+ Z%=G.Epsilon,lambda h,s:h[0]
+ A%=a,lambda h,s:c(s[1])
+ A%=U,lambda h,s:r(s[1])
+ A%=S+E+B,lambda h,s:s[2]
+ return G
+G=build_grammar()
+L=metodo_predictivo_no_recursivo(G)
+
+#region regex
+class Regex:
+ def __init__(self,regex,skip_whitespaces=False):
+  W=self
+  W.regex=regex
+  W.automaton=W.build_automaton(regex)
+ def __call__(self,text):
+  W=self
+  return W.automaton.recognize(text)
+ @staticmethod
+ def build_automaton(regex,skip_whitespaces=False):
+  h=regex_tokenizer(regex,G,skip_whitespaces=False)
+  f=L(h)
+  T=evaluate_parse(f,h)
+  H=T.evaluate()
+  X=nfa_to_dfa(H)
+  k=automata_minimization(X)
+  return k

@@ -84,6 +84,9 @@ def automata_closure(a1):
 
     return NFA(states, finals, transitions, start)
 
+
+
+
 #region automata_minimization
 def distinguish_states(group, automaton, partition):
     split = {}
@@ -93,21 +96,18 @@ def distinguish_states(group, automaton, partition):
         transitions = automaton.transitions[member.value]
         labels = ((transitions[symbol][0] if symbol in transitions else None) for symbol in vocabulary)
         key = tuple((partition[node].representative if node in partition.nodes else None) for node in labels)
-        
-        labels = (automaton.transitions[member.value][symbol][0] for symbol in vocabulary)
-        key = tuple((partition[node].representative if node in partition.nodes else None) for node in labels)
         try:
             split[key].append(member.value)
         except KeyError:
             split[key] = [member.value]
 
-    return [ group for group in split.values()]
-            
+    return [subgroup for subgroup in split.values()]
+
 def state_minimization(automaton):
     partition = DisjointSet(*range(automaton.states))
     
-    partition.merge(q for q in range(automaton.states) if q not in automaton.finals)
-    partition.merge(automaton.finals)
+    partition.merge(s for s in automaton.finals)
+    partition.merge(s for s in range(automaton.states) if s not in automaton.finals)
     
     while True:
         new_partition = DisjointSet(*range(automaton.states))

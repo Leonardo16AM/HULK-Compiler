@@ -1,6 +1,6 @@
 from src.cmp.pycompiler import *
 from src.cmp.utils import pprint, inspect
-from src.container_set import ContainerSet
+from src.cmp.utils import ContainerSet
 from itertools import islice
 from src.compute_firsts import compute_local_first
 

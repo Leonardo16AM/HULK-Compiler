@@ -3,7 +3,8 @@
 *.json
 *.pyc
 test.ipynb
-src/cmp/tools
+
+src/cmp/tools/*
 */__pycache__/*
 */.ipynb_checkpoints/*
 */.pytest_cache/*
@@ -12,3 +13,7 @@ src/cmp/tools
 */.mypy_cache/*
 */.pytest_cache/*
 */.coverage
+src/cmp/tools/automata.py
+src/cmp/tools/evaluation.py
+src/cmp/tools/parsing.py
+src/cmp/tools/regex.py

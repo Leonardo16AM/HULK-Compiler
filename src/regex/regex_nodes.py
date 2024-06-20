@@ -1,6 +1,7 @@
 from src.cmp.ast import AtomicNode,BinaryNode,UnaryNode
 from src.cmp.pycompiler import Grammar
-from src.automaton_ops import automata_closure,automata_concatenation,automata_minimization,automata_union,nfa_to_dfa
+from src.automaton_ops import automata_closure,automata_concatenation,automata_union
+
 from src.DFA import DFA
 from src.NFA import NFA
 from src.cmp.utils import Token
@@ -23,7 +24,7 @@ class ClosureNode(UnaryNode):
       return automata_closure(value)  
 
 #region UnionNode
-class UnionNode(BinaryNode):
+class OrNode(BinaryNode):
     @staticmethod
     def operate(left,right):
         return automata_union(left,right)

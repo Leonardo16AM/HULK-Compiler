@@ -12,7 +12,7 @@ def regex_grammar():
 
     base %= bext+union,lambda h,s:s[2],None,lambda h,s:s[1]
 
-    union %= pipe+base,lambda h,s:UnionNode(h[0],s[2])
+    union %= pipe+base,lambda h,s:OrNode(h[0],s[2])
     union %= G.Epsilon,lambda h,s:h[0]
 
     bext %= kleene+concat,lambda h,s:s[2],None,lambda h,s:s[1]
@@ -29,4 +29,4 @@ def regex_grammar():
     batch %= eps,lambda h,s:EpsilonNode(s[1])
     batch %= oppar+base+clpar,lambda h,s:s[2]
 
-    return G, star, pipe, oppar, clpar, symb
+    return G
