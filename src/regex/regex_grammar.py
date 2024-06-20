@@ -1,5 +1,5 @@
-from cmp.pycompiler import Grammar
-from regex_ast import *
+from src.cmp.pycompiler import Grammar
+from src.regex.regex_nodes import *
 
 #region regex_grammar
 def regex_grammar():
@@ -29,4 +29,4 @@ def regex_grammar():
     batch %= eps,lambda h,s:EpsilonNode(s[1])
     batch %= oppar+base+clpar,lambda h,s:s[2]
 
-    return G
+    return G, star, pipe, oppar, clpar, symb

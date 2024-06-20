@@ -1,3 +1,14 @@
 *.o
 *.exe
 *.json
+*.pyc
+test.ipynb
+src/cmp/tools
+*/__pycache__/*
+*/.ipynb_checkpoints/*
+*/.pytest_cache/*
+*/.vscode/*
+*/.mypy_cache/*
+*/.mypy_cache/*
+*/.pytest_cache/*
+*/.coverage

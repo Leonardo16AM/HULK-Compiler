@@ -1,6 +1,6 @@
-from .NFA import NFA,nfa_to_dfa
-from .DFA import DFA
-from cmp.utils import DisjointSet
+from src.NFA import NFA
+from src.DFA import DFA,nfa_to_dfa
+from src.cmp.utils import DisjointSet
 
 #region automata_union
 def automata_union(a1, a2):
@@ -145,3 +145,12 @@ def automata_minimization(automaton):
 
     return DFA(len(states), finals, transitions, start)
 
+#region eps_nfa
+def eps_nfa():
+    return NFA(1, {0}, {}, 0)
+
+
+
+#region basic_nfa
+def basic_nfa(token):
+    return NFA(2, {1}, {(0, token): {1}}, 0)

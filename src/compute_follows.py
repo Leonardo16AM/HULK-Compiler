@@ -1,8 +1,8 @@
-from cmp.pycompiler import *
-from cmp.utils import pprint, inspect
-from .container_set import ContainerSet
+from src.cmp.pycompiler import *
+from src.cmp.utils import pprint, inspect
+from src.container_set import ContainerSet
 from itertools import islice
-from .compute_firsts import compute_local_first
+from src.compute_firsts import compute_local_first
 
 #region compute_follows
 def compute_follows(G, firsts):

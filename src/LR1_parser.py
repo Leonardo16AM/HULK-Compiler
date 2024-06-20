@@ -1,9 +1,9 @@
-from cmp.pycompiler import Item
-from .container_set import ContainerSet
-from .compute_firsts import compute_local_first
-from .compute_firsts import compute_firsts
-from cmp.automata import State, multiline_formatter
-from .shift_reduce import ShiftReduceParser
+from src.cmp.pycompiler import Item
+from src.cmp.utils import ContainerSet
+from src.compute_firsts import compute_local_first
+from src.compute_firsts import compute_firsts
+from src.cmp.automata import State, multiline_formatter
+from src.shift_reduce import ShiftReduceParser
 
 #region expand
 def expand(item, firsts):

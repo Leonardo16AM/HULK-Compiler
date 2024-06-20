@@ -1,5 +1,5 @@
-from .NFA import NFA
-from cmp.utils import ContainerSet
+from src.NFA import NFA
+from src.cmp.utils import ContainerSet
 
 #region DFA
 class DFA(NFA):

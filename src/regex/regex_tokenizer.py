@@ -1,4 +1,4 @@
-from cmp.utils import Token
+from src.cmp.utils import Token
 
 #region regex_tokenizer
 def regex_tokenizer(text, G, skip_whitespaces=True):

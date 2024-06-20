@@ -1,9 +1,9 @@
-from cmp.ast import AtomicNode,BinaryNode,UnaryNode
-from cmp.pycompiler import Grammar
-from ..automaton_ops import automata_closure,automata_concatenation,automata_minimization,automata_union,nfa_to_dfa
-from ..DFA import DFA
-from ..NFA import NFA
-from cmp.utils import Token
+from src.cmp.ast import AtomicNode,BinaryNode,UnaryNode
+from src.cmp.pycompiler import Grammar
+from src.automaton_ops import automata_closure,automata_concatenation,automata_minimization,automata_union,nfa_to_dfa
+from src.DFA import DFA
+from src.NFA import NFA
+from src.cmp.utils import Token
 
 #region EpsilonNode
 class EpsilonNode(AtomicNode):
@@ -33,4 +33,5 @@ class ConcatNode(BinaryNode):
     @staticmethod
     def operate(left,right):
         return automata_concatenation(left,right)
+        
  

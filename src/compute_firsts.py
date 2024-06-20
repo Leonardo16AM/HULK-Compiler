@@ -1,6 +1,6 @@
-from cmp.pycompiler import *
-from cmp.utils import pprint, inspect
-from .container_set import ContainerSet
+from src.cmp.pycompiler import *
+from src.cmp.utils import pprint, inspect
+from src.cmp.utils import ContainerSet
 
 #region compute_local_first
 def compute_local_first(firsts, alpha):
