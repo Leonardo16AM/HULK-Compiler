@@ -1,12 +1,12 @@
-from cmp.pycompiler import Symbol
-from cmp.pycompiler import NonTerminal
-from cmp.pycompiler import Terminal
-from cmp.pycompiler import EOF
-from cmp.pycompiler import Sentence, SentenceList
-from cmp.pycompiler import Epsilon
-from cmp.pycompiler import Production
-from cmp.pycompiler import Grammar
-from cmp.utils import pprint, inspect
+from src.cmp.pycompiler import Symbol
+from src.cmp.pycompiler import NonTerminal
+from src.cmp.pycompiler import Terminal
+from src.cmp.pycompiler import EOF
+from src.cmp.pycompiler import Sentence, SentenceList
+from src.cmp.pycompiler import Epsilon
+from src.cmp.pycompiler import Production
+from src.cmp.pycompiler import Grammar
+from src.cmp.utils import pprint, inspect
 
 G = Grammar()
 

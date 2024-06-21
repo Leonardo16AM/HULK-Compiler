@@ -2,7 +2,7 @@ from src.cmp.pycompiler import *
 from src.cmp.utils import pprint, inspect
 from src.cmp.utils import ContainerSet
 from itertools import islice
-from src.compute_firsts import compute_local_first
+from src.grammar.compute_firsts import compute_local_first
 
 #region compute_follows
 def compute_follows(G, firsts):

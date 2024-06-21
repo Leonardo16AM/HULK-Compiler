@@ -1,7 +1,7 @@
 from src.cmp.utils import Token
 from src.cmp.automata import State
 from src.regex.regex import regex
-from src.errors import *
+from src.utils.errors import *
 
 
 

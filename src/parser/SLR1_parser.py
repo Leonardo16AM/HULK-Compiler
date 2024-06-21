@@ -1,8 +1,8 @@
-from src.shift_reduce import ShiftReduceParser
+from parser.shift_reduce import ShiftReduceParser
 from src.cmp.automata import State
 from src.cmp.pycompiler import Item
-from src.compute_firsts import compute_firsts
-from src.compute_follows import compute_follows
+from src.grammar.compute_firsts import compute_firsts
+from src.grammar.compute_follows import compute_follows
 
 
 #region build_LR0_automaton

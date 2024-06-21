@@ -4,11 +4,8 @@ import re
 import sys
 
 def clean_text(text):
-    """ Elimina caracteres especiales y códigos ANSI de una cadena para obtener su longitud visible. """
-    # Elimina códigos ANSI
     ansi_escape = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
     text = ansi_escape.sub('', text)
-    # Reemplaza caracteres que podrían ser problemáticos
     text = re.sub(r'[\r\n\t]', ' ', text)
     return text
 
@@ -16,13 +13,13 @@ def error(type, message, code, stop=False):
     try:
         columns, _ = os.get_terminal_size()
     except OSError:
-        columns = 80  # Ancho predeterminado de la terminal
+        columns = 80  
 
     message = clean_text(message)
     code = clean_text(code)
 
-    if len(code) > 30:
-        code = code[:27] + '...'
+    if len(code) > 40:
+        code = code[:47] + '...'
 
     code = "On: \x1B[3m" + code + "\x1B[23m"
 

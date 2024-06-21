@@ -1,6 +1,6 @@
 import os
 from termcolor import colored
-from src.preprocess import *
+from src.utils.preprocess import *
 from src.lexer.hulk_lexer import hulk_lexer
 
 

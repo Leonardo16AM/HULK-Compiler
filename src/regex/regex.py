@@ -1,5 +1,5 @@
 # Importaciones y configuración inicial
-from src.automaton_ops import *
+from src.automaton.automaton_ops import *
 from src.cmp.tools.evaluation import evaluate_parse
 from src.regex.regex_nodes import *
 from src.regex.regex_grammar import regex_grammar

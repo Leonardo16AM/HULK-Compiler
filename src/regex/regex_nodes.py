@@ -1,9 +1,9 @@
 from src.cmp.ast import AtomicNode,BinaryNode,UnaryNode
 from src.cmp.pycompiler import Grammar
-from src.automaton_ops import automata_closure,automata_concatenation,automata_union
+from src.automaton.automaton_ops import automata_closure,automata_concatenation,automata_union
 
-from src.DFA import DFA
-from src.NFA import NFA
+from src.automaton.DFA import DFA
+from src.automaton.NFA import NFA
 from src.cmp.utils import Token
 
 #region EpsilonNode

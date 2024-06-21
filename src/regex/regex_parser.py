@@ -1,9 +1,9 @@
 
-from src.compute_firsts import compute_firsts
-from src.compute_follows import compute_follows
-from src.shift_reduce import ShiftReduceParser
+from src.grammar.compute_firsts import compute_firsts
+from src.grammar.compute_follows import compute_follows
+from src.parser.shift_reduce import ShiftReduceParser
 from src.cmp.pycompiler import EOF
-from src.errors import *
+from src.utils.errors import *
 
 #region RegexParser
 class RegexParser:
