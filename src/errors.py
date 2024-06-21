@@ -3,57 +3,59 @@ from termcolor import colored
 import re
 import sys
 
-#region print_error
-def clean_ansi(texto):
-    """ Elimina los códigos ANSI de una cadena para obtener su longitud visible. """
+def clean_text(text):
+    """ Elimina caracteres especiales y códigos ANSI de una cadena para obtener su longitud visible. """
+    # Elimina códigos ANSI
     ansi_escape = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
-    return ansi_escape.sub('', texto)
+    text = ansi_escape.sub('', text)
+    # Reemplaza caracteres que podrían ser problemáticos
+    text = re.sub(r'[\r\n\t]', ' ', text)
+    return text
 
-def error(type, message, code,stop=False):
+def error(type, message, code, stop=False):
     try:
-        columnas, _ = os.get_terminal_size()
+        columns, _ = os.get_terminal_size()
     except OSError:
-        columnas = 80 
+        columns = 80  # Ancho predeterminado de la terminal
 
-    message = message.replace('\n', ' ')
-    code = code.replace('\n', ' ')
+    message = clean_text(message)
+    code = clean_text(code)
 
     if len(code) > 30:
-        code = code[:30] + '...'
+        code = code[:27] + '...'
 
-    max_ancho = columnas - 4
+    code = "On: \x1B[3m" + code + "\x1B[23m"
 
-    detalles = [
-        colored(type, 'yellow', attrs=['bold'])+": ",
+    details = [
+        colored(type, 'yellow', attrs=['bold']) + ": ",
         message,
-        "On: \x1B[3m" + code + "\x1B[23m"
+        code
     ]
 
-    ancho = min(max(len(clean_ansi(linea)) for linea in detalles), max_ancho)
+    max_width = columns - 4
+    width = min(max(len(clean_text(detail)) for detail in details), max_width)
 
-    esquina_sup_izq = '╔'
-    esquina_sup_der = '╗'
-    esquina_inf_izq = '╚'
-    esquina_inf_der = '╝'
+    top_left = '╔'
+    top_right = '╗'
+    bottom_left = '╚'
+    bottom_right = '╝'
     horizontal = '═'
     vertical = '║'
 
-    borde_horizontal = esquina_sup_izq + (horizontal * (ancho + 2)) + esquina_sup_der
-    print(colored(borde_horizontal, 'red'))
+    border_horizontal = top_left + (horizontal * (width + 2)) + top_right
+    print(colored(border_horizontal, 'red'))
 
-    for detalle in detalles:
-        texto_limpio = clean_ansi(detalle)
-        if len(texto_limpio) > ancho:
-            detalle = detalle[:ancho - 3] + '...'
+    for detail in details:
+        clean_detail = clean_text(detail)
+        if len(clean_detail) > width:
+            detail = detail[:width - 3] + '...'
 
         print(colored(vertical + ' ', 'red'), end='')
-        print(detalle.ljust(ancho + len(detalle) - len(texto_limpio)), end='')
+        print(detail.ljust(width + len(detail) - len(clean_detail)), end='')
         print(colored(' ' + vertical, 'red'))
 
-    borde_horizontal = esquina_inf_izq + (horizontal * (ancho + 2)) + esquina_inf_der
-    print(colored(borde_horizontal, 'red'))
+    border_horizontal = bottom_left + (horizontal * (width + 2)) + bottom_right
+    print(colored(border_horizontal, 'red'))
 
     if stop:
         sys.exit(1)
-
-
