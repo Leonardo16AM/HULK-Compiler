@@ -44,5 +44,5 @@ class RegexParser:
                     stack.extend(reversed(production.Right))
                     history.append(production)
                 except KeyError:
-                    raise LexerError(f"(REGEX) Unexpected token: {current_token.lex}")
+                    raise LexerError(f"(REGEX) Unexpected token type: {current_token.token_type}")
         return history

@@ -8,8 +8,12 @@ from src.errors import LexerError
 class lexer:
     def __init__(self, table, eof):
         self.eof = eof
+        print("BUILDING LEXER")
         self.regexs = self._build_regexs(table)
+        print("REGEX BUILT")
         self.automaton = self._build_automaton()
+        print("AUTOMATON BUILT")
+        
 
     def _build_regexs(self, table):
         regexs = []
