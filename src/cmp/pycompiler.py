@@ -1,5 +1,6 @@
 import json
 
+#region Symbol
 class Symbol(object):
 
     def __init__(self, name, grammar):
@@ -32,6 +33,7 @@ class Symbol(object):
     def __len__(self):
         return 1
 
+#region NonTerminal
 class NonTerminal(Symbol):
 
 
@@ -91,6 +93,7 @@ class NonTerminal(Symbol):
     def IsEpsilon(self):
         return False
 
+#region Terminal
 class Terminal(Symbol):
 
     def __init__(self, name, grammar):
@@ -108,11 +111,13 @@ class Terminal(Symbol):
     def IsEpsilon(self):
         return False
 
+#region EOF
 class EOF(Terminal):
 
     def __init__(self, Grammar):
-        super().__init__('$', Grammar)
+        super().__init__('<EOF>', Grammar)
 
+#region Sentence
 class Sentence(object):
 
     def __init__(self, *args):
@@ -162,6 +167,7 @@ class Sentence(object):
     def IsEpsilon(self):
         return False
 
+#region SentenceList
 class SentenceList(object):
 
     def __init__(self, *args):
@@ -184,7 +190,7 @@ class SentenceList(object):
         if isinstance(other, Symbol):
             return self | Sentence(other)
 
-
+#region Epsilon
 class Epsilon(Terminal, Sentence):
 
     def __init__(self, grammar):
@@ -215,7 +221,7 @@ class Epsilon(Terminal, Sentence):
     @property
     def IsEpsilon(self):
         return True
-
+#region Production
 class Production(object):
 
     def __init__(self, nonTerminal, sentence):
@@ -243,7 +249,7 @@ class Production(object):
     @property
     def IsEpsilon(self):
         return self.Right.IsEpsilon
-
+#region AttributeProduction
 class AttributeProduction(Production):
 
     def __init__(self, nonTerminal, sentence, attributes):
@@ -271,7 +277,7 @@ class AttributeProduction(Production):
     # sintetizar en ingles??????, pending aggrement
     def syntetice(self):
         pass
-
+#region Grammar
 class Grammar():
 
     def __init__(self):
@@ -451,7 +457,7 @@ class Grammar():
         else:
             return self.copy()
     #endchange
-
+#region Item
 class Item:
 
     def __init__(self, production, pos, lookaheads=[]):

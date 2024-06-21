@@ -2,7 +2,9 @@ try:
     import pydot
 except:
     pass
+from PIL import Image
 
+#region State
 class State:
     def __init__(self, state, final=False, formatter=lambda x: str(x), shape='circle'):
         self.state = state
@@ -174,7 +176,7 @@ class State:
             ids = id(start)
             if ids not in visited:
                 visited.add(ids)
-                G.add_node(pydot.Node(ids, label=start.name, shape=self.shape, style='bold' if start.final else ''))
+                G.add_node(pydot.Node(ids, label=f"{start.name}  {start.tag}", shape=self.shape, style='bold' if start.final else ''))
                 for tran, destinations in start.transitions.items():
                     for end in destinations:
                         visit(end)
@@ -187,6 +189,13 @@ class State:
         G.add_edge(pydot.Edge('start', id(self), label='', style='dashed'))
 
         return G
+    
+    def plot(self,show=True):
+        pydot_graph = self.graph()
+        pydot_graph.write_png('automaton.png')
+        if show:
+            img = Image.open('automaton.png')
+            img.show()
 
     def _repr_svg_(self):
         try:
@@ -197,9 +206,17 @@ class State:
     def write_to(self, fname):
         return self.graph().write_svg(fname)
 
+
+
+
+#region multiline_formatter
 def multiline_formatter(state):
     return '\n'.join(str(item) for item in state)
 
+
+
+
+#region lr0_formatter
 def lr0_formatter(state):
     try:
         return '\n'.join(str(item)[:-4] for item in state)

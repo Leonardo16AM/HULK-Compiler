@@ -1,6 +1,6 @@
-from cmp.pycompiler import Sentence, Production
-from cmp.utils import ContainerSet, Token, UnknownToken
-from cmp.tools.parsing import build_parsing_table, metodo_predictivo_no_recursivo
+from src.cmp.pycompiler import Sentence, Production
+from src.cmp.utils import ContainerSet, Token, UnknownToken
+from src.cmp.tools.parsing import build_parsing_table, metodo_predictivo_no_recursivo
 
 class BasicHulk:
     def __init__(self, G):
