@@ -1,5 +1,5 @@
-from src.NFA import NFA
-from src.DFA import DFA,nfa_to_dfa
+from src.automaton.NFA import NFA
+from src.automaton.DFA import DFA,nfa_to_dfa
 from src.cmp.utils import DisjointSet
 
 #region automata_union

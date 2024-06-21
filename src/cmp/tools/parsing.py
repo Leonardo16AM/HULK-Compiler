@@ -136,7 +136,7 @@ def metodo_predictivo_no_recursivo(G, M=None, firsts=None, follows=None):
 
 
 #region SHIFT REDUCE PARSER
-from src.shift_reduce import ShiftReduceParser
+from parser.shift_reduce import ShiftReduceParser
 # class ShiftReduceParser:
 #  SHIFT='SHIFT'
 #  REDUCE='REDUCE'
@@ -191,7 +191,7 @@ from src.cmp.tools.parsing import compute_firsts,compute_local_first
 from src.cmp.pycompiler import Item
 
 #region expand
-from src.LR1_parser import expand
+from parser.LR1_parser import expand
 # def expand(d,n):
 #  y=d.NextSymbol
 #  if y is None or not y.IsNonTerminal:
@@ -204,7 +204,7 @@ from src.LR1_parser import expand
 #  return[Item(prod,0,V)for prod in y.productions]
 
 #region compress
-from src.LR1_parser import compress
+from parser.LR1_parser import compress
 # def compress(A):
 #  l={}
 #  for d in A:
@@ -218,7 +218,7 @@ from src.LR1_parser import compress
 
 
 #region closure_lr1
-from src.LR1_parser import closure_lr1
+from parser.LR1_parser import closure_lr1
 # def closure_lr1(A,n):
 #  H=ContainerSet(*A)
 #  O=True
@@ -231,7 +231,7 @@ from src.LR1_parser import closure_lr1
 #  return compress(H)
 
 #region goto_lr1
-from src.LR1_parser import goto_lr1
+from parser.LR1_parser import goto_lr1
 # def goto_lr1(A,P,firsts=None,just_kernel=False):
 #  assert just_kernel or firsts is not None,'`firsts` must be provided if `just_kernel=False`'
 #  A=frozenset(d.NextItem()for d in A if d.NextSymbol==P)
@@ -239,7 +239,7 @@ from src.LR1_parser import goto_lr1
 # from src.cmp.automata import State,multiline_formatter
 
 #region build_LR1_automaton
-from src.LR1_parser import build_LR1_automaton
+from parser.LR1_parser import build_LR1_automaton
 # def build_LR1_automaton(G):
 #  assert len(G.startSymbol.productions)==1,'Grammar must be augmented'
 #  n=compute_firsts(G)
@@ -271,7 +271,7 @@ from src.LR1_parser import build_LR1_automaton
 # from src.cmp.tools.parsing import ShiftReduceParser
 
 #region LR1Parser
-from src.LR1_parser import LR1Parser
+from parser.LR1_parser import LR1Parser
 # class LR1Parser(ShiftReduceParser):
 #  def _build_parsing_table(W):
 #   G=W.G.AugmentedGrammar(True)

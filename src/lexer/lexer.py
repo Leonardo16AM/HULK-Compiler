@@ -1,7 +1,7 @@
 from src.cmp.utils import Token
 from src.cmp.automata import State
 from src.regex.regex import regex
-from src.errors import LexerError
+from src.utils.errors import *
 
 
 
@@ -85,7 +85,7 @@ class lexer:
                 yield lexeme, token_type
                 text = text[len(lexeme):]
             else:
-                raise LexerError("Tokenization error at: " + text)
+                error("LEXER ERROR","Tokenization error",text,True)
         yield '$', self.eof
 
     def __call__(self, text):

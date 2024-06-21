@@ -1,4 +1,4 @@
-from src.NFA import NFA
+from src.automaton.NFA import NFA
 from src.cmp.utils import ContainerSet
 
 #region DFA

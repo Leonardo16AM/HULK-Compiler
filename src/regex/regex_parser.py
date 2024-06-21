@@ -1,9 +1,9 @@
 
-from src.compute_firsts import compute_firsts
-from src.compute_follows import compute_follows
-from src.shift_reduce import ShiftReduceParser
+from src.grammar.compute_firsts import compute_firsts
+from src.grammar.compute_follows import compute_follows
+from src.parser.shift_reduce import ShiftReduceParser
 from src.cmp.pycompiler import EOF
-from src.errors import LexerError
+from src.utils.errors import *
 
 #region RegexParser
 class RegexParser:
@@ -37,12 +37,12 @@ class RegexParser:
                         break
                     position += 1
                 else:
-                    raise LexerError(f"(REGEX) Unexpected token: {current_token.lex}")
+                    error("LEXER ERROR","(REGEX) Unexpected token",current_token.lex,True)
             else:
                 try:
                     production = self.parsing_table[top, current_token.token_type][0]
                     stack.extend(reversed(production.Right))
                     history.append(production)
                 except KeyError:
-                    raise LexerError(f"(REGEX) Unexpected token type: {current_token.token_type}")
+                    error("LEXER ERROR","(REGEX) Unexpected token type",current_token.token_type,True)
         return history

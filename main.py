@@ -1,73 +1,41 @@
-# from src.cmp.tools.regex import Regex as regex
-from src.regex.regex import  regex
+import os
+from termcolor import colored
+from src.utils.preprocess import *
+from src.lexer.hulk_lexer import hulk_lexer
 
-#region RE-Test
 
-# Test 1: Single character
-r = regex('a')
-assert r('a') == True
-assert r('b') == False
+def pipeline(file_path):
+    print(colored("=================LOADING FILE===================",'blue'))
 
-# Test 2: Kleene star
-r = regex('a*')
-assert r('') == True
-assert r('a') == True
-assert r('aa') == True    
-assert r('b') == False
+    with open(file_path, 'rb') as file:
+        code = file.read().decode('utf-8')
 
-# Test 3: Union
-r = regex('a|b')
-assert r('a') == True
-assert r('b') == True
-assert r('c') == False
+    code = code.replace('\r\n', '\n').replace('\r', '\n')
 
-# Test 4: Union with Kleene star
-r = regex('a*|b')
-assert r('') == True
-assert r('a') == True
-assert r('aa') == True
-assert r('b') == True
-assert r('c') == False
+    print(f"LOADED: {file_path}")
+    
+    # LEXER
+    
+    print(colored("=================TOKENIZING=====================",'blue'))
 
-# Test 5: Union of Kleene stars
-r = regex('a*|b*')
-assert r('') == True
-assert r('a') == True
-assert r('aa') == True
-assert r('b') == True
-assert r('bb') == True
-assert r('c') == False
+    if os.path.isfile("src/lang/hulk_lexer.pkl"):
+        print("LOADING LEXER")
+        lexer=load_object("src/lang/hulk_lexer.pkl")
+    else:
+        lexer=hulk_lexer()
+        save_object(lexer,"src/lang/hulk_lexer.pkl") 
 
-# Test 6: Concatenation
-r = regex('ab')
-assert r('ab') == True
-assert r('a') == False
-assert r('b') == False
-assert r('abc') == False
+    tokens=lexer(code)
+    print("TOKENS:" , tokens)
 
-# Test 7: Complex expression with concatenation and union
-r = regex('(a|b)c')
-assert r('ac') == True
-assert r('bc') == True
-assert r('cc') == False
-assert r('a') == False
 
-# Test 8: Nested Kleene stars
-r = regex('(a|b)*c')
-assert r('c') == True
-assert r('ac') == True
-assert r('bc') == True
-assert r('aabc') == True
-assert r('aabbc') == True
-assert r('cc') == False
+    print(colored("===================PARSING======================",'blue'))
+    print(colored("================CHECKING_SEMATICS===============",'blue'))
+    print(colored("================GERNERATING_CODE================",'blue'))
 
-# Test 9: Union and concatenation with nested Kleene star
-r = regex('a*(bc|d)*e')
-assert r('e') == True
-assert r('ae') == True
-assert r('abce') == True
-assert r('abcdbce') == True
-assert r('aabcbcde') == True
-assert r('f') == False
 
-print("All tests passed!")
+if __name__ == '__main__':
+    pipeline("examples/print.hulk")
+
+
+    
