@@ -3,8 +3,8 @@ from src.cmp.utils import ContainerSet
 
 
 #From my own code
-from src.compute_firsts import *
-from src.compute_follows import *
+from src.grammar.compute_firsts import *
+from src.grammar.compute_follows import *
 
 # def compute_local_first(firsts,alpha):
 #  f=firsts
@@ -136,167 +136,167 @@ def metodo_predictivo_no_recursivo(G, M=None, firsts=None, follows=None):
 
 
 #region SHIFT REDUCE PARSER
-from parser.shift_reduce import ShiftReduceParser
-# class ShiftReduceParser:
-#  SHIFT='SHIFT'
-#  REDUCE='REDUCE'
-#  OK='OK'
-#  def __init__(self,G,verbose=False):
-#   self.G=G
-#   self.verbose=verbose
-#   self.action={}
-#   self.goto={}
-#   self._build_parsing_table()
-#  def _build_parsing_table(self):
-#   raise NotImplementedError()
-#  def __call__(self,w,get_shift_reduce=False):
-#   stack=[0]
-#   cursor=0
-#   output=[]
-#   operations=[]
-#   while True:
-#    state=stack[-1]
-#    lookahead=w[cursor]
-#    if self.verbose:print(stack,'<---||--->',w[cursor:])
-#    if(state,lookahead)not in self.action:
-#     print((state,lookahead))
-#     print("Error. Aborting...")
-#     return None
-#    action,tag=self.action[state,lookahead]
-#    if action==self.SHIFT:
-#     operations.append(self.SHIFT)
-#     stack+=[lookahead,tag]
-#     cursor+=1
-#    elif action==self.REDUCE:
-#     operations.append(self.REDUCE)
-#     output.append(tag)
-#     head,body=tag
-#     for symbol in reversed(body):
-#      stack.pop()
-#      assert stack.pop()==symbol
-#     state=stack[-1]
-#     goto=self.goto[state,head]
-#     stack+=[head,goto]
-#    elif action==self.OK:
-#     stack.pop()
-#     assert stack.pop()==self.G.startSymbol
-#     assert len(stack)==1
-#     return output if not get_shift_reduce else(output,operations)
-#    else:
-#     raise Exception('Invalid action!!!')
+from src.parser.shift_reduce import ShiftReduceParser
+class ShiftReduceParser:
+ SHIFT='SHIFT'
+ REDUCE='REDUCE'
+ OK='OK'
+ def __init__(self,G,verbose=False):
+  self.G=G
+  self.verbose=verbose
+  self.action={}
+  self.goto={}
+  self._build_parsing_table()
+ def _build_parsing_table(self):
+  raise NotImplementedError()
+ def __call__(self,w,get_shift_reduce=False):
+  stack=[0]
+  cursor=0
+  output=[]
+  operations=[]
+  while True:
+   state=stack[-1]
+   lookahead=w[cursor]
+   if self.verbose:print(stack,'<---||--->',w[cursor:])
+   if(state,lookahead)not in self.action:
+    print((state,lookahead))
+    print("Error. Aborting...")
+    return None
+   action,tag=self.action[state,lookahead]
+   if action==self.SHIFT:
+    operations.append(self.SHIFT)
+    stack+=[lookahead,tag]
+    cursor+=1
+   elif action==self.REDUCE:
+    operations.append(self.REDUCE)
+    output.append(tag)
+    head,body=tag
+    for symbol in reversed(body):
+     stack.pop()
+     assert stack.pop()==symbol
+    state=stack[-1]
+    goto=self.goto[state,head]
+    stack+=[head,goto]
+   elif action==self.OK:
+    stack.pop()
+    assert stack.pop()==self.G.startSymbol
+    assert len(stack)==1
+    return output if not get_shift_reduce else(output,operations)
+   else:
+    raise Exception('Invalid action!!!')
    
 
 from src.cmp.utils import ContainerSet
 from src.cmp.tools.parsing import compute_firsts,compute_local_first
 from src.cmp.pycompiler import Item
 
-#region expand
-from parser.LR1_parser import expand
-# def expand(d,n):
-#  y=d.NextSymbol
-#  if y is None or not y.IsNonTerminal:
-#   return[]
-#  V=ContainerSet()
-#  for E in d.Preview():
-#   k=compute_local_first(n,E)
-#   V.update(k)
-#  assert not V.contains_epsilon
-#  return[Item(prod,0,V)for prod in y.productions]
+# region expand
+from src.parser.LR1_parser import expand
+def expand(d,n):
+ y=d.NextSymbol
+ if y is None or not y.IsNonTerminal:
+  return[]
+ V=ContainerSet()
+ for E in d.Preview():
+  k=compute_local_first(n,E)
+  V.update(k)
+ assert not V.contains_epsilon
+ return[Item(prod,0,V)for prod in y.productions]
 
-#region compress
-from parser.LR1_parser import compress
-# def compress(A):
-#  l={}
-#  for d in A:
-#   f=d.Center()
-#   try:
-#    V=l[f]
-#   except KeyError:
-#    l[f]=V=set()
-#   V.update(d.lookaheads)
-#  return{Item(x.production,x.pos,set(k))for x,k in l.items()}
+# region compress
+from src.parser.LR1_parser import compress
+def compress(A):
+ l={}
+ for d in A:
+  f=d.Center()
+  try:
+   V=l[f]
+  except KeyError:
+   l[f]=V=set()
+  V.update(d.lookaheads)
+ return{Item(x.production,x.pos,set(k))for x,k in l.items()}
 
 
-#region closure_lr1
-from parser.LR1_parser import closure_lr1
-# def closure_lr1(A,n):
-#  H=ContainerSet(*A)
-#  O=True
-#  while O:
-#   O=False
-#   a=ContainerSet()
-#   for d in H:
-#    a.extend(expand(d,n))
-#   O=H.update(a)
-#  return compress(H)
+# region closure_lr1
+from src.parser.LR1_parser import closure_lr1
+def closure_lr1(A,n):
+ H=ContainerSet(*A)
+ O=True
+ while O:
+  O=False
+  a=ContainerSet()
+  for d in H:
+   a.extend(expand(d,n))
+  O=H.update(a)
+ return compress(H)
 
-#region goto_lr1
-from parser.LR1_parser import goto_lr1
-# def goto_lr1(A,P,firsts=None,just_kernel=False):
-#  assert just_kernel or firsts is not None,'`firsts` must be provided if `just_kernel=False`'
-#  A=frozenset(d.NextItem()for d in A if d.NextSymbol==P)
-#  return A if just_kernel else closure_lr1(A,firsts)
-# from src.cmp.automata import State,multiline_formatter
+# region goto_lr1
+from src.parser.LR1_parser import goto_lr1
+def goto_lr1(A,P,firsts=None,just_kernel=False):
+ assert just_kernel or firsts is not None,'`firsts` must be provided if `just_kernel=False`'
+ A=frozenset(d.NextItem()for d in A if d.NextSymbol==P)
+ return A if just_kernel else closure_lr1(A,firsts)
+from src.cmp.automata import State,multiline_formatter
 
-#region build_LR1_automaton
-from parser.LR1_parser import build_LR1_automaton
-# def build_LR1_automaton(G):
-#  assert len(G.startSymbol.productions)==1,'Grammar must be augmented'
-#  n=compute_firsts(G)
-#  n[G.EOF]=ContainerSet(G.EOF)
-#  I=G.startSymbol.productions[0]
-#  o=Item(I,0,lookaheads=(G.EOF,))
-#  t=frozenset([o])
-#  H=closure_lr1(t,n)
-#  r=State(frozenset(H),True)
-#  v=[t]
-#  h={t:r}
-#  while v:
-#   L=v.pop()
-#   U=h[L]
-#   for P in G.terminals+G.nonTerminals:
-#    H=closure_lr1(L,n)
-#    g=goto_lr1(H,P,just_kernel=True)
-#    if not g:
-#     continue
-#    try:
-#     w=h[g]
-#    except KeyError:
-#     H=closure_lr1(g,n)
-#     w=h[g]=State(frozenset(H),True)
-#     v.append(g)
-#    U.add_transition(P.Name,w)
-#  r.set_formatter(multiline_formatter)
-#  return r
-# from src.cmp.tools.parsing import ShiftReduceParser
+# region build_LR1_automaton
+from src.parser.LR1_parser import build_LR1_automaton
+def build_LR1_automaton(G):
+ assert len(G.startSymbol.productions)==1,'Grammar must be augmented'
+ n=compute_firsts(G)
+ n[G.EOF]=ContainerSet(G.EOF)
+ I=G.startSymbol.productions[0]
+ o=Item(I,0,lookaheads=(G.EOF,))
+ t=frozenset([o])
+ H=closure_lr1(t,n)
+ r=State(frozenset(H),True)
+ v=[t]
+ h={t:r}
+ while v:
+  L=v.pop()
+  U=h[L]
+  for P in G.terminals+G.nonTerminals:
+   H=closure_lr1(L,n)
+   g=goto_lr1(H,P,just_kernel=True)
+   if not g:
+    continue
+   try:
+    w=h[g]
+   except KeyError:
+    H=closure_lr1(g,n)
+    w=h[g]=State(frozenset(H),True)
+    v.append(g)
+   U.add_transition(P.Name,w)
+ r.set_formatter(multiline_formatter)
+ return r
+from src.cmp.tools.parsing import ShiftReduceParser
 
-#region LR1Parser
-from parser.LR1_parser import LR1Parser
-# class LR1Parser(ShiftReduceParser):
-#  def _build_parsing_table(W):
-#   G=W.G.AugmentedGrammar(True)
-#   r=build_LR1_automaton(G)
-#   for i,D in enumerate(r):
-#    if W.verbose:print(i,'\t','\n\t '.join(str(x)for x in D.state),'\n')
-#    D.idx=i
-#   for D in r:
-#    e=D.idx
-#    for d in D.state:
-#     if d.IsReduceItem:
-#      p=d.production
-#      if p.Left==G.startSymbol:
-#       W._register(W.action,(e,G.EOF),(W.OK,None))
-#      else:
-#       for P in d.lookaheads:
-#        W._register(W.action,(e,P),(W.REDUCE,p))
-#     else:
-#      P=d.NextSymbol
-#      g=D.get(P.Name).idx
-#      if P.IsTerminal:
-#       W._register(W.action,(e,P),(W.SHIFT,g))
-#      else:
-#       W._register(W.goto,(e,P),g)
-#  @staticmethod
-#  def _register(F,K,N):
-#   assert K not in F or F[K]==N,'Shift-Reduce or Reduce-Reduce conflict!!!'
-#   F[K]=N
+# region LR1Parser
+from src.parser.LR1_parser import LR1Parser
+class LR1Parser(ShiftReduceParser):
+ def _build_parsing_table(W):
+  G=W.G.AugmentedGrammar(True)
+  r=build_LR1_automaton(G)
+  for i,D in enumerate(r):
+   if W.verbose:print(i,'\t','\n\t '.join(str(x)for x in D.state),'\n')
+   D.idx=i
+  for D in r:
+   e=D.idx
+   for d in D.state:
+    if d.IsReduceItem:
+     p=d.production
+     if p.Left==G.startSymbol:
+      W._register(W.action,(e,G.EOF),(W.OK,None))
+     else:
+      for P in d.lookaheads:
+       W._register(W.action,(e,P),(W.REDUCE,p))
+    else:
+     P=d.NextSymbol
+     g=D.get(P.Name).idx
+     if P.IsTerminal:
+      W._register(W.action,(e,P),(W.SHIFT,g))
+     else:
+      W._register(W.goto,(e,P),g)
+ @staticmethod
+ def _register(F,K,N):
+  assert K not in F or F[K]==N,'Shift-Reduce or Reduce-Reduce conflict!!!'
+  F[K]=N

@@ -22,7 +22,7 @@ except ImportError:
 from src.cmp.utils import ContainerSet
 
 #region NFA
-from src.NFA import NFA
+from src.automaton.NFA import NFA
 # class NFA:
 #  def __init__(self,states,finals,transitions,start=0):
 #   self.states=states
@@ -60,7 +60,7 @@ from src.NFA import NFA
 #    pass
 
 #region DFA
-from src.DFA import DFA
+from src.automaton.DFA import DFA
 # class DFA(NFA):
 #  def __init__(self,states,finals,transitions,start=0):
 #   assert L(y(value,e)for value in transitions.values())
@@ -84,7 +84,7 @@ from src.DFA import DFA
  
 
 #region move
-from src.DFA import move
+from src.automaton.DFA import move
 # def move(automaton,states,symbol):
 #  M=t()
 #  for z in states:
@@ -97,7 +97,7 @@ from src.DFA import move
 #  return M
 
 #region epsilon_closure
-from src.DFA import epsilon_closure
+from src.automaton.DFA import epsilon_closure
 # def epsilon_closure(automaton,states):
 #  Y=[s for s in states]
 #  x={s for s in states}
@@ -111,7 +111,7 @@ from src.DFA import epsilon_closure
 #  return ContainerSet(*x)
 
 #region nfa_to_dfa
-from src.DFA import nfa_to_dfa
+from src.automaton.DFA import nfa_to_dfa
 # def nfa_to_dfa(automaton):
 #  c={}
 #  l=epsilon_closure(automaton,[automaton.start])
@@ -146,7 +146,7 @@ from src.DFA import nfa_to_dfa
 
 
 #region automata_union
-from src.automaton_ops import automata_union
+from src.automaton.automaton_ops import automata_union
 # def automata_union(a1,a2):
 #  c={}
 #  l=0
@@ -170,7 +170,7 @@ from src.automaton_ops import automata_union
 #  return NFA(J,S,c,l)
 
 #region automata_concatenation
-from src.automaton_ops import automata_concatenation
+from src.automaton.automaton_ops import automata_concatenation
 # def automata_concatenation(a1,a2):
 #  c={}
 #  l=0
@@ -198,7 +198,7 @@ from src.automaton_ops import automata_concatenation
 #  return NFA(J,S,c,l)
 
 #region automata_closure
-from src.automaton_ops import automata_closure
+from src.automaton.automaton_ops import automata_closure
 # def automata_closure(a1):
 #  c={}
 #  l=0
@@ -237,7 +237,7 @@ def distinguish_states(R,automaton,K):
  return[R for R in U.values()]
 
 #region state_minimization
-from src.automaton_ops import state_minimization
+from src.automaton.automaton_ops import state_minimization
 # def state_minimization(automaton):
 #  K=DisjointSet(*ss(automaton.states))
 #  K.merge(s for s in automaton.finals)
@@ -253,7 +253,7 @@ from src.automaton_ops import state_minimization
 #  return K
 
 #region automata_minimization
-from src.automaton_ops import automata_minimization
+from src.automaton.automaton_ops import automata_minimization
 # def automata_minimization(automaton):
 #  K=state_minimization(automaton)
 #  I=[s for s in K.representatives]
