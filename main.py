@@ -2,6 +2,10 @@ import os
 from termcolor import colored
 from src.utils.preprocess import *
 from src.lexer.hulk_lexer import hulk_lexer
+from src.grammar.hulk_grammar import hulk_grammar
+# from src.parser.LR1_parser import LR1Parser
+from src.cmp.tools.parsing import LR1Parser
+from src.cmp.evaluation import evaluate_reverse_parse
 
 
 def pipeline(file_path):
@@ -30,6 +34,16 @@ def pipeline(file_path):
 
 
     print(colored("===================PARSING======================",'blue'))
+    print("LOADING GRAMMAR")
+    G=hulk_grammar()
+    print("CREATING LR1 PARSER")
+    parser=LR1Parser(G)
+    print("PARSING TOKENS")
+    parse,operations=parser(tokens)
+
+    print("EVALUATING REVERSE PARSE")
+    ast = evaluate_reverse_parse(parse, operations, tokens)
+
     print(colored("================CHECKING_SEMATICS===============",'blue'))
     print(colored("================GERNERATING_CODE================",'blue'))
 
