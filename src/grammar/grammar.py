@@ -90,8 +90,6 @@ statement_list %= G.Epsilon
 statement_list %= statement + statement_list
 statement_list %= expr_block + statement_list
 
-single_expr %= arithmetic_expr
-single_expr %= boolean_expr
 single_expr %= string_expr
 single_expr %= if_t + opar + boolean_expr + cpar + single_expr + elif_branch + else_branch
 single_expr %= while_t + opar + boolean_expr + cpar + single_expr
@@ -104,10 +102,9 @@ single_expr %= obracket + args + cbracket
 single_expr %= obracket + single_expr + bar_bar + id + in_t + single_expr + cbracket
 
 elif_branch %= G.Epsilon
-elif_branch %= elif_t + opar + boolean_expr + cpar + single_expr
+elif_branch %= elif_t + opar + boolean_expr + cpar + single_expr + elif_branch
 
-else_branch %= G.Epsilon
-elif_branch %= else_t + single_expr
+else_branch %= else_t + single_expr
 
 var_list %= G.Epsilon
 var_list %= comma + var_list_element + var_list 
@@ -115,14 +112,9 @@ var_list %= comma + var_list_element + var_list
 var_list_element %= id + colon + type_id + equal + single_expr
 var_list_element %= id + equal + single_expr
 
-string_expr %= string
-string_expr %= general_atom
-string_expr %= single_expr + at + single_expr + concat_list
-string_expr %= single_expr + double_at + single_expr + concat_list
-
-concat_list %= G.Epsilon
-concat_list %= at + single_expr + concat_list
-concat_list %= double_at + single_expr + concat_list
+string_expr %= boolean_expr
+string_expr %= string_expr + at + boolean_expr
+string_expr %= string_expr + double_at + boolean_expr
 
 boolean_expr %= boolean_expr_lv2
 boolean_expr %= boolean_expr + and_t + boolean_expr_lv2
@@ -131,19 +123,16 @@ boolean_expr_lv2 %= boolean_expr_lv3
 boolean_expr_lv2 %= boolean_expr_lv2 + or_t + boolean_expr_lv3
 
 boolean_expr_lv3 %= comparation
-boolean_expr_lv3 %= not_t + general_atom
+boolean_expr_lv3 %= not_t + comparation
 
-comparation %= general_atom + is_t + type_id
+comparation %= comparation + is_t + type_id
 comparation %= arithmetic_expr + less + arithmetic_expr
 comparation %= arithmetic_expr + greater + arithmetic_expr
 comparation %= arithmetic_expr + less_eq + arithmetic_expr
 comparation %= arithmetic_expr + greater_eq + arithmetic_expr
 comparation %= arithmetic_expr + eq_eq + arithmetic_expr
 comparation %= arithmetic_expr + dif + arithmetic_expr
-comparation %= opar + string_expr + cpar + eq_eq + opar + string_expr + cpar
-comparation %= opar + string_expr + cpar + dif + opar + string_expr + cpar
-comparation %= general_atom
-comparation %= bool
+comparation %= arithmetic_expr
 
 arithmetic_expr %= arithmetic_expr_lv2
 arithmetic_expr %= arithmetic_expr + plus + arithmetic_expr_lv2
@@ -158,12 +147,13 @@ arithmetic_expr_lv3 %= arithmetic_expr_lv4
 arithmetic_expr_lv3 %= arithmetic_expr_lv4 + power + arithmetic_expr_lv3
 
 arithmetic_expr_lv4 %= general_atom
-arithmetic_expr_lv4 %= num
 arithmetic_expr_lv4 %= minus + general_atom
-arithmetic_expr_lv4 %= minus + num
 
 general_atom %= id
 general_atom %= func_call
+general_atom %= num
+general_atom %= bool
+general_atom %= string
 general_atom %= opar + single_expr + cpar
 general_atom %= expr_block
 general_atom %= id + obracket + single_expr + cbracket
