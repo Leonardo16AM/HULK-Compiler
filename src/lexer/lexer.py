@@ -88,5 +88,11 @@ class lexer:
                 error("LEXER ERROR","Tokenization error",text,True)
         yield '$', self.eof
 
-    def __call__(self, text):
-        return [Token(lex, ttype) for lex, ttype in self._tokenize(text)]
+    def _escapable(self,text):
+        return all(c in {' ','\n','\t'} for c in text)
+    
+    def __call__(self, text,escape_symbols=True):
+        ret=[Token(lex, ttype) for lex, ttype in self._tokenize(text)]
+        if escape_symbols:
+            ret=[t for t in ret if not self._escapable(t.lex)]
+        return ret
