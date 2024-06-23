@@ -1,5 +1,5 @@
 from src.cmp.pycompiler import Grammar
-from grammar.hulk_ast import*
+from src.grammar.hulk_ast import*
  
 G = Grammar()
 
@@ -17,7 +17,7 @@ concat_list, arg_list, func_call, type_instance, args, general_atom = G.NonTermi
 # endregion
 
 #region Terminals
-dot, colon, semicolon, comma, opar, cpar, arrow, lcurly, rcurly, at, double_at, assignment_op, obracket, cbracket, bar_bar = G.Terminals('. : ; , ( ) -> { } @ @@ := [ ] ||')
+dot, colon, semicolon, comma, opar, cpar, arrow, lcurly, rcurly, at, double_at, assignment_op, obracket, cbracket, bar_bar = G.Terminals('. : ; , ( ) => { } @ @@ := [ ] ||')
 and_t, or_t = G.Terminals('& |')
 equal, plus, minus, star, div, mod, power, not_t, less, greater, less_eq, greater_eq, eq_eq, dif = G.Terminals('= + - * / % ^ ! < > <= >= == !=')
 if_t, elif_t, else_t, let, in_t, while_t, for_t, is_t, type_t, function, inherits, protocol, extends, new, as_t = G.Terminals('if elif else let in while for is type function inherits protocol extends new as')
@@ -47,7 +47,6 @@ parameter_list %= id + colon + type_id, lambda h, s: [(s[1], s[3])]
 parameter_list %= id + comma + parameter_list, lambda h, s: [(s[1], None)] + s[3]
 parameter_list %= id + colon + type_id + comma + parameter_list, lambda h, s: [(s[1], s[3])] + s[5]
 
-# id, params, features, parent
 type_dec %= type_t + id + lcurly + feature + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], [], [s[4]]+s[5], None)
 type_dec %= type_t + id + inherits + id + lcurly + feature + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], [], [s[6]]+s[7], s[4])
 type_dec %= type_t + id + opar + parameters + cpar + lcurly + feature + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], s[4], [s[7]]+s[8], None)
@@ -86,16 +85,17 @@ statement_list %= expr_block, lambda h, s: [s[1]]
 statement_list %= statement + statement_list, lambda h, s: [s[1]] + s[2]
 statement_list %= expr_block + statement_list, lambda h, s: [s[1]] + s[2]
 
+single_expr %= expr_block, lambda h, s: s[1]
 single_expr %= string_expr, lambda h, s: s[1]
 single_expr %= obracket + args + cbracket, lambda h, s: vector_node(s[2])
 single_expr %= single_expr + is_t + type_id, lambda h, s: is_node(s[1], s[3])
-single_expr %= id + assignment_op + single_expr, lambda h, s: assignment_node(s[1], s[3])
+single_expr %= id + assignment_op + string_expr, lambda h, s: assignment_node(s[1], s[3])
 single_expr %= new + type_id + opar + args + cpar, lambda h, s: new_node(s[2], s[4])
-single_expr %= let + var_list + in_t + single_expr, lambda h, s: let_node(s[2], s[5])
-single_expr %= while_t + opar + boolean_expr + cpar + single_expr, lambda h, s: while_node(s[3], s[5])
-single_expr %= for_t + opar + id + in_t + single_expr + cpar + single_expr, lambda h, s: for_node(variable_declaration_node(s[3], None, None), s[5], s[7])
+single_expr %= let + var_list + in_t + string_expr, lambda h, s: let_node(s[2], s[5])
+single_expr %= while_t + opar + boolean_expr + cpar + string_expr, lambda h, s: while_node(s[3], s[5])
+single_expr %= for_t + opar + id + in_t + single_expr + cpar + string_expr, lambda h, s: for_node(variable_declaration_node(s[3], None, None), s[5], s[7])
 single_expr %= obracket + single_expr + bar_bar + id + in_t + single_expr + cbracket, lambda h, s: vector_comprehension_node(variable_declaration_node(s[4]), s[2], s[6])
-single_expr %= if_t + opar + boolean_expr + cpar + single_expr + elif_branch + else_t + single_expr, lambda h, s: if_node([(s[3], s[5])] + s[6] + [(True, s[7])])
+single_expr %= if_t + opar + boolean_expr + cpar + single_expr + elif_branch + else_t + string_expr, lambda h, s: if_node([(s[3], s[5])] + s[6] + [(True, s[7])])
 
 elif_branch %= G.Epsilon, lambda h, s: []
 elif_branch %= elif_t + opar + boolean_expr + cpar + single_expr + elif_branch, lambda h, s: [(s[3], s[5])] + s[6]
@@ -109,6 +109,7 @@ string_expr %= boolean_expr, lambda h, s: s[1]
 string_expr %= string_expr + at + boolean_expr, lambda h, s: concatenation_node(s[1], s[3])
 string_expr %= string_expr + double_at + boolean_expr, lambda h, s: concatenation_node(s[1], s[3])
 
+# # boolean_expr %= bool
 boolean_expr %= boolean_expr_lv2, lambda h, s: s[1]
 boolean_expr %= boolean_expr + and_t + boolean_expr_lv2, lambda h, s: and_node(s[1], s[3])
 
@@ -146,7 +147,7 @@ general_atom %= num, lambda h, s: number_node(s[1])
 general_atom %= bool, lambda h, s: bool_node(s[1])
 general_atom %= string, lambda h, s: string_node(s[1])
 general_atom %= func_call, lambda h, s: s[1]
-general_atom %= expr_block, lambda h, s: s[1]
+# general_atom %= expr_block, lambda h, s: s[1]
 general_atom %= opar + single_expr + cpar, lambda h, s: s[2]
 general_atom %= general_atom + as_t + type_id, lambda h, s: as_node(s[1], s[3])
 general_atom %= id + dot + func_call + func_call_list, lambda h, s: property_call_node(s[1], [s[3]]+s[4])
