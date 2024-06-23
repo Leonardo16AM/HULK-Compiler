@@ -172,3 +172,44 @@ class property_call_node(expression_node):
     def __init__(self, id, calls):
         self.id = id
         self.calls = calls
+
+class if_node(expression_node):
+    def __init__(self, conditions_bodies):
+        self.conditions_bodies = conditions_bodies
+
+class vector_node(expression_node):
+    def __init__(self, elements):
+        self.elements = elements
+
+class new_node(expression_node):
+    def __init__(self, type_id, args):
+        self.type_id = type_id
+        self.args = args
+
+class assignment_node(expression_node):
+    def __init__(self, id, expr):
+        self.id = id
+        self.expr = expr
+
+class let_node(expression_node):
+    def __init__(self, declarations, body):
+        self.declarations = declarations
+        self.body = body
+
+class while_node(expression_node):
+    def __init__(self, condition, body):
+        self.condition = condition
+        self.body = body
+
+class for_node(expression_node):
+    def __init__(self, id, expr, body):
+        self.id = id
+        self.expr = expr
+        self.body = body
+
+class vector_comprehension_node(expression_node):
+    def __init__(self, id, expr, iterable):
+        self.id = id
+        self.expr = expr
+        self.vector = iterable
+        
