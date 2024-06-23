@@ -78,31 +78,32 @@ global_expr %= expr_block, lambda h, s: s[1]
 
 statement %= single_expr + semicolon, lambda h, s: s[1]
 
-expr_block %= lcurly + statement + statement_list + rcurly, lambda h, s: expression_block_node([s[2]]+s[3])
-expr_block %= lcurly + expr_block + statement_list + rcurly, lambda h, s: expression_block_node([s[2]]+s[3])
+expr_block %= lcurly + statement_list + rcurly, lambda h, s: expression_block_node(s[2])
+expr_block %= lcurly + statement_list + rcurly, lambda h, s: expression_block_node(s[2])
 
-statement_list %= G.Epsilon, lambda h, s: []
+statement_list %= statement, lambda h, s: [s[1]]
+statement_list %= expr_block, lambda h, s: [s[1]]
 statement_list %= statement + statement_list, lambda h, s: [s[1]] + s[2]
 statement_list %= expr_block + statement_list, lambda h, s: [s[1]] + s[2]
 
 single_expr %= string_expr, lambda h, s: s[1]
-single_expr %= if_t + opar + boolean_expr + cpar + single_expr + elif_branch + else_t + single_expr, lambda h, s: if_node([(s[3], s[5])] + s[6] + [(True, s[7])])
-single_expr %= while_t + opar + boolean_expr + cpar + single_expr, lambda h, s: while_node(s[3], s[5])
-single_expr %= let + var_list_element + var_list + in_t + single_expr, lambda h, s: let_node([s[2]] + s[3], s[5])
-single_expr %= for_t + opar + id + in_t + single_expr + cpar + single_expr, lambda h, s: for_node(s[3], s[5], s[7])
+single_expr %= obracket + args + cbracket, lambda h, s: vector_node(s[2])
+single_expr %= single_expr + is_t + type_id, lambda h, s: is_node(s[1], s[3])
 single_expr %= id + assignment_op + single_expr, lambda h, s: assignment_node(s[1], s[3])
 single_expr %= new + type_id + opar + args + cpar, lambda h, s: new_node(s[2], s[4])
-single_expr %= obracket + args + cbracket, lambda h, s: vector_node(s[2])
-single_expr %= obracket + single_expr + bar_bar + id + in_t + single_expr + cbracket, lambda h, s: vector_comprehension_node(s[2], s[4], s[6])
+single_expr %= let + var_list + in_t + single_expr, lambda h, s: let_node(s[2], s[5])
+single_expr %= while_t + opar + boolean_expr + cpar + single_expr, lambda h, s: while_node(s[3], s[5])
+single_expr %= for_t + opar + id + in_t + single_expr + cpar + single_expr, lambda h, s: for_node(variable_declaration_node(s[3], None, None), s[5], s[7])
+single_expr %= obracket + single_expr + bar_bar + id + in_t + single_expr + cbracket, lambda h, s: vector_comprehension_node(variable_declaration_node(s[4]), s[2], s[6])
+single_expr %= if_t + opar + boolean_expr + cpar + single_expr + elif_branch + else_t + single_expr, lambda h, s: if_node([(s[3], s[5])] + s[6] + [(True, s[7])])
 
 elif_branch %= G.Epsilon, lambda h, s: []
 elif_branch %= elif_t + opar + boolean_expr + cpar + single_expr + elif_branch, lambda h, s: [(s[3], s[5])] + s[6]
 
-var_list %= G.Epsilon, lambda h, s: []
-var_list %= comma + var_list_element + var_list, lambda h, s: [s[2]] + s[3]
-
-var_list_element %= id + colon + type_id + equal + single_expr, lambda h, s: variable_declaration_node(s[1], s[3], s[5])
-var_list_element %= id + equal + single_expr, lambda h, s: variable_declaration_node(s[1], None, s[3])
+var_list %= id + equal + single_expr, lambda h, s: [variable_declaration_node(s[1], None, s[3])]
+var_list %= id + colon + type_id + equal + single_expr, lambda h, s: [variable_declaration_node(s[1], s[3], s[5])]
+var_list %= id + equal + single_expr + comma + var_list, lambda h, s: [variable_declaration_node(s[1], None, s[3])] + s[5]
+var_list %= id + colon + type_id + equal + single_expr + comma + var_list, lambda h, s: [variable_declaration_node(s[1], s[3], s[5])] + s[7]
 
 string_expr %= boolean_expr, lambda h, s: s[1]
 string_expr %= string_expr + at + boolean_expr, lambda h, s: concatenation_node(s[1], s[3])
@@ -118,22 +119,21 @@ boolean_expr_lv3 %= comparation, lambda h, s: s[1]
 boolean_expr_lv3 %= not_t + comparation, lambda h, s: not_node(s[2])
 
 comparation %= arithmetic_expr, lambda h, s: s[1]
-comparation %= comparation + is_t + type_id, lambda h, s: is_node(s[1], s[3])
+comparation %= arithmetic_expr + dif + arithmetic_expr, lambda h, s: not_equals_node(s[1], s[3])
 comparation %= arithmetic_expr + less + arithmetic_expr, lambda h, s: less_node(s[1], s[3])
+comparation %= arithmetic_expr + eq_eq + arithmetic_expr, lambda h, s: equals_node(s[1], s[3])
 comparation %= arithmetic_expr + greater + arithmetic_expr, lambda h, s: greater_node(s[1], s[3])
 comparation %= arithmetic_expr + less_eq + arithmetic_expr, lambda h, s: less_equal_node(s[1], s[3])
 comparation %= arithmetic_expr + greater_eq + arithmetic_expr, lambda h, s: greater_equal_node(s[1], s[3])
-comparation %= arithmetic_expr + eq_eq + arithmetic_expr, lambda h, s: equals_node(s[1], s[3])
-comparation %= arithmetic_expr + dif + arithmetic_expr, lambda h, s: not_equals_node(s[1], s[3])
 
 arithmetic_expr %= arithmetic_expr_lv2, lambda h, s: s[1]
 arithmetic_expr %= arithmetic_expr + plus + arithmetic_expr_lv2, lambda h, s: plus_node(s[1], s[3])
 arithmetic_expr %= arithmetic_expr + minus + arithmetic_expr_lv2, lambda h, s: minus_node(s[1], s[3])
 
 arithmetic_expr_lv2 %= arithmetic_expr_lv3, lambda h, s: s[1]
-arithmetic_expr_lv2 %= arithmetic_expr_lv2 + star + arithmetic_expr_lv3, lambda h, s: multiply_node(s[1], s[3])
 arithmetic_expr_lv2 %= arithmetic_expr_lv2 + div + arithmetic_expr_lv3, lambda h, s: divide_node(s[1], s[3])
 arithmetic_expr_lv2 %= arithmetic_expr_lv2 + mod + arithmetic_expr_lv3, lambda h, s: modulo_node(s[1], s[3])
+arithmetic_expr_lv2 %= arithmetic_expr_lv2 + star + arithmetic_expr_lv3, lambda h, s: multiply_node(s[1], s[3])
 
 arithmetic_expr_lv3 %= arithmetic_expr_lv4, lambda h, s: s[1]
 arithmetic_expr_lv3 %= minus + arithmetic_expr_lv3, lambda h, s: minus_node(0, s[2])
@@ -142,15 +142,15 @@ arithmetic_expr_lv4 %= general_atom, lambda h, s: s[1]
 arithmetic_expr_lv4 %= general_atom + power + arithmetic_expr_lv4, lambda h, s: power_node(s[1], s[3])
 
 general_atom %= id, lambda h, s: variable_node(s[1])
-general_atom %= func_call, lambda h, s: s[1]
 general_atom %= num, lambda h, s: number_node(s[1])
 general_atom %= bool, lambda h, s: bool_node(s[1])
 general_atom %= string, lambda h, s: string_node(s[1])
-general_atom %= opar + single_expr + cpar, lambda h, s: s[2]
+general_atom %= func_call, lambda h, s: s[1]
 general_atom %= expr_block, lambda h, s: s[1]
-general_atom %= id + obracket + single_expr + cbracket, lambda h, s: index_node(s[1], s[3])
+general_atom %= opar + single_expr + cpar, lambda h, s: s[2]
 general_atom %= general_atom + as_t + type_id, lambda h, s: as_node(s[1], s[3])
 general_atom %= id + dot + func_call + func_call_list, lambda h, s: property_call_node(s[1], [s[3]]+s[4])
+general_atom %= id + obracket + single_expr + cbracket, lambda h, s: index_node(s[1], s[3])
 
 func_call_list %= G.Epsilon, lambda h, s: []
 func_call_list %= dot + func_call + func_call_list, lambda h, s: [s[2]] + s[3]

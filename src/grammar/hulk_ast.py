@@ -201,14 +201,14 @@ class while_node(expression_node):
         self.body = body
 
 class for_node(expression_node):
-    def __init__(self, id, expr, body):
-        self.id = id
+    def __init__(self, variable, expr, body):
+        self.variable = variable
         self.expr = expr
         self.body = body
 
 class vector_comprehension_node(expression_node):
-    def __init__(self, id, expr, iterable):
-        self.id = id
+    def __init__(self, variable, expr, iterable):
+        self.variable = variable 
         self.expr = expr
         self.vector = iterable
         
