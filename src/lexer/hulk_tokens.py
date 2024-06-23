@@ -1,71 +1,70 @@
 
-from enum import Enum, auto
-
+from src.grammar.hulk_grammar import *
 #region TokenType
-class TokenType(Enum):
-    OPEN_PAREN = auto()
-    CLOSE_PAREN = auto()
-    OPEN_BRACKET = auto()
-    CLOSE_BRACKET = auto()
-    OPEN_SQUARE_BRACKET = auto()
-    CLOSE_SQUARE_BRACKET = auto()
-    COMMA = auto()
-    DOT = auto()
-    COLON = auto()
-    SEMICOLON = auto()
-    ARROW = auto()
-    DOUBLE_BAR = auto()
-    ASSIGMENT = auto()
-    DEST_ASSIGMENT = auto()
+class TokenType():
+    OPEN_PAREN = opar
+    CLOSE_PAREN = cpar
+    OPEN_BRACKET = lcurly
+    CLOSE_BRACKET = rcurly
+    OPEN_SQUARE_BRACKET = obracket
+    CLOSE_SQUARE_BRACKET = cbracket
+    COMMA = comma
+    DOT = dot
+    COLON = colon
+    SEMICOLON = semicolon
+    ARROW = arrow
+    DOUBLE_BAR = bar_bar
+    ASSIGMENT = assignment_op
+    DEST_ASSIGMENT = equal
 
-    IDENTIFIER = auto()
-    STRING = auto()
-    NUMBER = auto()
-    BOOLEAN = auto()
-    PI = auto()
+    IDENTIFIER = id
+    STRING = string
+    NUMBER = num
+    BOOLEAN = bool
+    PI = 'PI'
 
-    PLUS = auto()
-    MINUS = auto()
-    STAR = auto()
-    DIV = auto()
-    MOD = auto()
-    POWER = auto()
-    POWER2 = auto()
+    PLUS = plus
+    MINUS = minus
+    STAR = star
+    DIV = div
+    MOD = mod
+    POWER = power
+    POWER2 = power
 
-    AND = auto()
-    OR = auto()
-    NOT = auto()
+    AND = and_t
+    OR = or_t
+    NOT = not_t
 
-    ARR = auto()
-    DOUBLE_ARR = auto()
+    ARR = at
+    DOUBLE_ARR = double_at
 
-    EQ = auto()
-    NEQ = auto()
-    LEQ = auto()
-    GEQ = auto()
-    LT = auto()
-    GT = auto()
+    EQ = eq_eq
+    NEQ = dif
+    LEQ = less_eq
+    GEQ = greater_eq
+    LT = less
+    GT = greater
 
-    FUNCTION = auto()
-    LET = auto()
-    IN = auto()
-    IF = auto()
-    ELSE = auto()
-    ELIF = auto()
-    WHILE = auto()
-    FOR = auto()
-    NEW = auto()
-    IS = auto()
-    AS = auto()
-    PROTOCOL = auto()
-    EXTENDS = auto()
-    TYPE = auto()
-    INHERITS = auto()
-    BASE = auto()
+    FUNCTION = function
+    LET = let
+    IN =  in_t
+    IF =  if_t
+    ELSE = else_t
+    ELIF = elif_t
+    WHILE = while_t
+    FOR = for_t
+    NEW = new
+    IS = is_t
+    AS = as_t
+    PROTOCOL = protocol
+    EXTENDS = extends
+    TYPE = type_t
+    INHERITS = inherits
+    BASE = 'BASE'
 
-    UNTERMINATED_STRING = auto()
-    ESCAPED_CHAR = auto()
-    SPACES = auto()
+    UNTERMINATED_STRING = 'UNTERMINATED_STRING'
+    ESCAPED_CHAR = 'ESCAPED_CHAR'
+    SPACES = 'SPACES'
 
 #region hulk_tokens
 def hulk_tokens():

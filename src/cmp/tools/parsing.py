@@ -2,75 +2,77 @@ from itertools import islice
 from src.cmp.utils import ContainerSet
 
 
-#From my own code
-from src.grammar.compute_firsts import *
-from src.grammar.compute_follows import *
 
-# def compute_local_first(firsts,alpha):
-#  f=firsts
-#  p=alpha
-#  D=ContainerSet()
-#  try:
-#   P=p.IsEpsilon
-#  except:
-#   P=False
-#  if P:
-#   D.set_epsilon()
-#  else:
-#   for G in p:
-#    M=f[G]
-#    D.update(M)
-#    if not M.contains_epsilon:
-#     break
-#   else:
-#    D.set_epsilon()
-#  return D
-# def compute_firsts(G):
-#  f={}
-#  E=True
-#  for b in G.terminals:
-#   f[b]=ContainerSet(b)
-#  for t in G.nonTerminals:
-#   f[t]=ContainerSet()
-#  while E:
-#   E=False
-#   for O in G.Productions:
-#    X=O.Left
-#    p=O.Right
-#    A=f[X]
-#    try:
-#     D=f[p]
-#    except:
-#     D=f[p]=ContainerSet()
-#    J=compute_local_first(f,p)
-#    E|=D.hard_update(J)
-#    E|=A.hard_update(J)
-#  return f
-# def compute_follows(G,firsts):
-#  f=firsts
-#  q={}
-#  E=True
-#  e={}
-#  for t in G.nonTerminals:
-#   q[t]=ContainerSet()
-#  q[G.startSymbol]=ContainerSet(G.EOF)
-#  while E:
-#   E=False
-#   for O in G.Productions:
-#    X=O.Left
-#    p=O.Right
-#    R=q[X]
-#    for i,sy in enumerate(p):
-#     if sy.IsNonTerminal:
-#      Q=q[sy]
-#      try:
-#       fb=e[p,i]
-#      except:
-#       fb=e[p,i]=compute_local_first(f,islice(p,i+1,None))
-#      E|=Q.update(fb)
-#      if fb.contains_epsilon:
-#       E|=Q.update(R)
-#  return q
+#region compute_local_first
+def compute_local_first(firsts,alpha):
+ f=firsts
+ p=alpha
+ D=ContainerSet()
+ try:
+  P=p.IsEpsilon
+ except:
+  P=False
+ if P:
+  D.set_epsilon()
+ else:
+  for G in p:
+   M=f[G]
+   D.update(M)
+   if not M.contains_epsilon:
+    break
+  else:
+   D.set_epsilon()
+ return D
+def compute_firsts(G):
+ f={}
+ E=True
+ for b in G.terminals:
+  f[b]=ContainerSet(b)
+ for t in G.nonTerminals:
+  f[t]=ContainerSet()
+ while E:
+  E=False
+  for O in G.Productions:
+   X=O.Left
+   p=O.Right
+   A=f[X]
+   try:
+    D=f[p]
+   except:
+    D=f[p]=ContainerSet()
+   J=compute_local_first(f,p)
+   E|=D.hard_update(J)
+   E|=A.hard_update(J)
+ return f
+
+#region compute_follows
+def compute_follows(G,firsts):
+ f=firsts
+ q={}
+ E=True
+ e={}
+ for t in G.nonTerminals:
+  q[t]=ContainerSet()
+ q[G.startSymbol]=ContainerSet(G.EOF)
+ while E:
+  E=False
+  for O in G.Productions:
+   X=O.Left
+   p=O.Right
+   R=q[X]
+   for i,sy in enumerate(p):
+    if sy.IsNonTerminal:
+     Q=q[sy]
+     try:
+      fb=e[p,i]
+     except:
+      fb=e[p,i]=compute_local_first(f,islice(p,i+1,None))
+     E|=Q.update(fb)
+     if fb.contains_epsilon:
+      E|=Q.update(R)
+ return q
+
+#region build_parsing_table
 def build_parsing_table(G,firsts,follows):
  f=firsts
  ff=follows
@@ -90,6 +92,8 @@ def build_parsing_table(G,firsts,follows):
     except:
      M[X,e]=[a]
  return M
+
+#region metodo_predictivo_no_recursivo
 def metodo_predictivo_no_recursivo(G,M=None,firsts=None,follows=None):
  fi=firsts
  fo=follows
@@ -136,7 +140,6 @@ def metodo_predictivo_no_recursivo(G, M=None, firsts=None, follows=None):
 
 
 #region SHIFT REDUCE PARSER
-from src.parser.shift_reduce import ShiftReduceParser
 class ShiftReduceParser:
  SHIFT='SHIFT'
  REDUCE='REDUCE'
@@ -158,6 +161,7 @@ class ShiftReduceParser:
    state=stack[-1]
    lookahead=w[cursor]
    if self.verbose:print(stack,'<---||--->',w[cursor:])
+   if self.verbose:print("ACTION::: ",self.action)
    if(state,lookahead)not in self.action:
     print((state,lookahead))
     print("Error. Aborting...")
@@ -187,11 +191,10 @@ class ShiftReduceParser:
    
 
 from src.cmp.utils import ContainerSet
-from src.cmp.tools.parsing import compute_firsts,compute_local_first
 from src.cmp.pycompiler import Item
 
+
 # region expand
-from src.parser.LR1_parser import expand
 def expand(d,n):
  y=d.NextSymbol
  if y is None or not y.IsNonTerminal:
@@ -204,7 +207,6 @@ def expand(d,n):
  return[Item(prod,0,V)for prod in y.productions]
 
 # region compress
-from src.parser.LR1_parser import compress
 def compress(A):
  l={}
  for d in A:
@@ -218,7 +220,6 @@ def compress(A):
 
 
 # region closure_lr1
-from src.parser.LR1_parser import closure_lr1
 def closure_lr1(A,n):
  H=ContainerSet(*A)
  O=True
@@ -231,15 +232,14 @@ def closure_lr1(A,n):
  return compress(H)
 
 # region goto_lr1
-from src.parser.LR1_parser import goto_lr1
 def goto_lr1(A,P,firsts=None,just_kernel=False):
  assert just_kernel or firsts is not None,'`firsts` must be provided if `just_kernel=False`'
  A=frozenset(d.NextItem()for d in A if d.NextSymbol==P)
  return A if just_kernel else closure_lr1(A,firsts)
+
 from src.cmp.automata import State,multiline_formatter
 
 # region build_LR1_automaton
-from src.parser.LR1_parser import build_LR1_automaton
 def build_LR1_automaton(G):
  assert len(G.startSymbol.productions)==1,'Grammar must be augmented'
  n=compute_firsts(G)
@@ -251,7 +251,10 @@ def build_LR1_automaton(G):
  r=State(frozenset(H),True)
  v=[t]
  h={t:r}
+ from termcolor import colored
  while v:
+  print(colored(len(v),'magenta'))
+  print("===================")
   L=v.pop()
   U=h[L]
   for P in G.terminals+G.nonTerminals:
@@ -268,18 +271,28 @@ def build_LR1_automaton(G):
    U.add_transition(P.Name,w)
  r.set_formatter(multiline_formatter)
  return r
-from src.cmp.tools.parsing import ShiftReduceParser
 
 # region LR1Parser
-from src.parser.LR1_parser import LR1Parser
 class LR1Parser(ShiftReduceParser):
  def _build_parsing_table(W):
   G=W.G.AugmentedGrammar(True)
+  
+  from termcolor import colored
+  if W.verbose:
+   print(colored(f'Grammar :{G}','cyan'))
   r=build_LR1_automaton(G)
+  if W.verbose:
+   print(colored(f'States :{r}','yellow'))
+  #  r.plot()
+
   for i,D in enumerate(r):
    if W.verbose:print(i,'\t','\n\t '.join(str(x)for x in D.state),'\n')
    D.idx=i
   for D in r:
+   
+   if W.verbose:
+    print(colored(f'{D}','cyan'))
+    print('========================')
    e=D.idx
    for d in D.state:
     if d.IsReduceItem:

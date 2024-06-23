@@ -2,12 +2,13 @@ import os
 from termcolor import colored
 from src.utils.preprocess import *
 from src.lexer.hulk_lexer import hulk_lexer
-from src.grammar.hulk_grammar import hulk_grammar
-# from src.parser.LR1_parser import LR1Parser
-from src.cmp.tools.parsing import LR1Parser
+from src.grammar.hulk_grammar import G
+from src.parser.LR1_parser import LR1Parser
+# from src.cmp.tools.parsing import LR1Parser
 from src.cmp.evaluation import evaluate_reverse_parse
 
 
+    
 def pipeline(file_path):
     print(colored("=================LOADING FILE===================",'blue'))
 
@@ -34,15 +35,28 @@ def pipeline(file_path):
 
 
     print(colored("===================PARSING======================",'blue'))
-    print("LOADING GRAMMAR")
-    G=hulk_grammar()
-    print("CREATING LR1 PARSER")
-    parser=LR1Parser(G)
-    print("PARSING TOKENS")
-    parse,operations=parser(tokens)
 
-    print("EVALUATING REVERSE PARSE")
-    ast = evaluate_reverse_parse(parse, operations, tokens)
+    if os.path.isfile("src/lang/hulk_parser.pkl"):
+        print("LOADING PARSER")
+        parser=load_object("src/lang/hulk_parser.pkl")
+    else:
+        print("LOADING GRAMMAR")
+        print("CREATING LR1 PARSER")
+        parser=LR1Parser(G,True)    
+        # save_object(parser,"src/lang/hulk_parser.pkl") 
+
+    print("PARSING TOKENS")
+    types=[ token.token_type for token in tokens]
+    
+    print("TYPES:",types)
+    parse,operations=parser(types,get_shift_reduce=True)
+
+    # print("PARSE:",parse)
+    # print("===================================")
+    # print("OPERATIONS:",operations)
+
+    # print("EVALUATING REVERSE PARSE")
+    # ast = evaluate_reverse_parse(parse, operations, tokens)
 
     print(colored("================CHECKING_SEMATICS===============",'blue'))
     print(colored("================GERNERATING_CODE================",'blue'))
