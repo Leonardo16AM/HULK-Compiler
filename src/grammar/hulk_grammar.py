@@ -40,10 +40,12 @@ function_dec %= function + id + opar + parameters + cpar + colon + type_id + arr
 function_dec %= function + id + opar + parameters + cpar + colon + type_id + expr_block, lambda h, s: function_declaration_node(s[2], s[4], s[7], s[8])
 
 parameters %= G.Epsilon, lambda h, s: []
-parameters %= id, lambda h, s: [(s[1], None)]
-parameters %= id + colon + type_id, lambda h, s: [(s[1], s[3])]
-parameters %= id + comma + parameters, lambda h, s: [(s[1], None)] + s[3]
-parameters %= id + colon + type_id + comma + parameters, lambda h, s: [(s[1], s[3])] + s[5]
+parameters %= parameter_list, lambda h, s: s[2]
+
+parameter_list %= id, lambda h, s: [(s[1], None)]
+parameter_list %= id + colon + type_id, lambda h, s: [(s[1], s[3])]
+parameter_list %= id + comma + parameter_list, lambda h, s: [(s[1], None)] + s[3]
+parameter_list %= id + colon + type_id + comma + parameter_list, lambda h, s: [(s[1], s[3])] + s[5]
 
 # id, params, features, parent
 type_dec %= type_t + id + lcurly + feature + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], [], [s[4]]+s[5], None)
@@ -63,11 +65,13 @@ protocol_dec %= protocol + id + lcurly + function_post + function_post_list + rc
 function_post_list %= G.Epsilon, lambda h, s: []
 function_post_list %= function_post + function_post_list, lambda h, s: [s[1]] + s[2]
 
-function_post %= id + opar + parameters_post + cpar + colon + type_id, lambda h, s: function_declaration_node(s[1], s[3], s[6], None)
+function_post %= id + opar + parameters_post + cpar + colon + type_id + semicolon, lambda h, s: function_declaration_node(s[1], s[3], s[6], None)
 
 parameters_post %= G.Epsilon, lambda h, s: []
-parameters_post %= id + colon + type_id, lambda h, s: [(s[1], s[3])]
-parameters_post %= id + colon + type_id + comma + parameters_post, lambda h, s: [(s[1], s[3])] + s[5]
+parameters_post %= parameter_post_list, lambda h, s: s[2]
+
+parameter_post_list %= id + colon + type_id, lambda h, s: [(s[1], s[3])]
+parameter_post_list %= id + colon + type_id + comma + parameter_post_list, lambda h, s: [(s[1], s[3])] + s[5]
 
 global_expr %= statement, lambda h, s: s[1]
 global_expr %= expr_block, lambda h, s: s[1]
