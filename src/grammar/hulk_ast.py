@@ -6,7 +6,6 @@ class node:
     pass
 
 
-
 class program_node(node):
     def __init__(self, dec_list, global_expr):
         self.dec_list = dec_list
