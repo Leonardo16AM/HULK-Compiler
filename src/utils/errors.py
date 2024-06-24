@@ -9,7 +9,7 @@ def clean_text(text):
     text = re.sub(r'[\r\n\t]', ' ', text)
     return text
 
-def error(type, message, code="", stop=False):
+def error(type, message, code="",line="", stop=False):
     try:
         columns, _ = os.get_terminal_size()
     except OSError:
@@ -20,15 +20,19 @@ def error(type, message, code="", stop=False):
 
     if len(code) > 40:
         code = code[:47] + '...'
-
-    code = "On: \x1B[3m" + code + "\x1B[23m"
-
+    
     details = [
         colored(type, 'yellow', attrs=['bold']) + ": ",
         message
     ]
+    
+    if len(line) > 0:
+        details.append("On: "+line)
+
     if len(code) > 0:
-        details.append(code)
+        details.append("Details: \x1B[3m" + code + "\x1B[23m")
+
+        
 
     max_width = columns - 4
     width = min(max(len(clean_text(detail)) for detail in details), max_width)

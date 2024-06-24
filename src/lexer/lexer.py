@@ -77,22 +77,30 @@ class lexer:
         return final_state, lexeme
 
     def _tokenize(self, text):
+        row = 1
+        column=1
         while text:
-            final_state, lexeme = self._walk(text)
+            final_state, lexeme= self._walk(text)
 
             if final_state:
                 (priority, token_type) = final_state.tag
-                yield lexeme, token_type
+                yield lexeme, token_type,row, column
+                if token_type == "ESCAPED_CHAR":
+                    row+=1
+                    column=1
+                else:
+                    column+=len(lexeme)
+                
                 text = text[len(lexeme):]
             else:
-                error("LEXER ERROR","Tokenization error",text,True)
-        yield '$', self.eof
+                error("LEXER ERROR","Tokenization error",text,f" row {row}, column {column}",True)
+        yield '$', self.eof,row,column
 
     def _escapable(self,text):
         return all(c in {' ','\n','\t'} for c in text)
     
     def __call__(self, text,escape_symbols=True):
-        ret=[Token(lex, ttype) for lex, ttype in self._tokenize(text)]
+        ret=[Token(lex, ttype,row,col) for lex, ttype,row,col in self._tokenize(text)]
         if escape_symbols:
             ret=[t for t in ret if not self._escapable(t.lex)]
         return ret

@@ -1,3 +1,4 @@
-protocol Hashable {
-    hash(): Number;
+{
+    print("The meaning of life is " @ 42);
+    print(-sin(2 * PI) ^ 2 + cos(3 * PI / log(4, 64)));
 }
