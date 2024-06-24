@@ -9,7 +9,7 @@ def clean_text(text):
     text = re.sub(r'[\r\n\t]', ' ', text)
     return text
 
-def error(type, message, code, stop=False):
+def error(type, message, code="", stop=False):
     try:
         columns, _ = os.get_terminal_size()
     except OSError:
@@ -25,9 +25,10 @@ def error(type, message, code, stop=False):
 
     details = [
         colored(type, 'yellow', attrs=['bold']) + ": ",
-        message,
-        code
+        message
     ]
+    if len(code) > 0:
+        details.append(code)
 
     max_width = columns - 4
     width = min(max(len(clean_text(detail)) for detail in details), max_width)
