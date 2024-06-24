@@ -1,4 +1,5 @@
 from src.cmp.utils import Token
+from src.utils.errors import *
 
 #region regex_tokenizer
 def regex_tokenizer(text, G, skip_whitespaces=True):
@@ -19,7 +20,7 @@ def regex_tokenizer(text, G, skip_whitespaces=True):
                 token = Token(next_char, G['symbol'])
                 i += 2 
             else:
-                raise ValueError("Carácter de escape '\\' al final del texto no es válido")
+                error("LEXER ERROR", "Carácter de escape '\\' al final del texto no es válido",char)
         else:
             try:
                 token = fixed_tokens[char]

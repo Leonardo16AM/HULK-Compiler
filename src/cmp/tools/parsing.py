@@ -1,5 +1,6 @@
 from itertools import islice
 from src.cmp.utils import ContainerSet
+from src.utils.errors import *
 
 
 
@@ -160,12 +161,32 @@ class ShiftReduceParser:
   while True:
    state=stack[-1]
    lookahead=w[cursor]
-   if self.verbose:print(stack,'<---||--->',w[cursor:])
-   if self.verbose:print("ACTION::: ",self.action)
+   if self.verbose:print(stack,colored('<---||--->','yellow'),w[cursor:])
+
+   on_state = [ action for action in self.action if action[0]==state]
+   
+  #  if type(lookahead)==str:
+  #   print(on_state[0][0])
+  #   print(self.OK)
+
+  #  print(type(self.action))
+
+
+  #  for action in on_state:
+  #   print(action,self.action[action])
+  
+   if type(lookahead)!=str:
+    for action in on_state:
+      if action[1].Name==lookahead.Name:
+       lookahead=action[1]
+
+  
+
    if(state,lookahead)not in self.action:
-    print((state,lookahead))
-    print("Error. Aborting...")
+    print(colored(f"ACTION:::  {[action for action in self.action if action[0]==state]}",'red'))
+    error("PARSING ERROR","Couldn't find (state,lookahead in self.action)",f" (state,lookahead):({state},{lookahead})")
     return None
+   
    action,tag=self.action[state,lookahead]
    if action==self.SHIFT:
     operations.append(self.SHIFT)

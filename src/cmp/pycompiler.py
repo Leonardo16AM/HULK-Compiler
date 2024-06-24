@@ -115,7 +115,7 @@ class Terminal(Symbol):
 class EOF(Terminal):
 
     def __init__(self, Grammar):
-        super().__init__('<EOF>', Grammar)
+        super().__init__('EOF', Grammar)
 
 #region Sentence
 class Sentence(object):
