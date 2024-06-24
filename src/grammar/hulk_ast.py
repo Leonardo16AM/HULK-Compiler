@@ -131,6 +131,10 @@ class modulo_node(expression_node):
         self.left = left
         self.right = right
 
+class negative_node(expression_node):
+    def __init__(self, expr):
+        self.expr = expr
+
 class power_node(expression_node):
     def __init__(self, left, right):
         self.left = left
@@ -168,6 +172,11 @@ class as_node(expression_node):
         self.type_id = type_id
 
 class property_call_node(expression_node):
+    def __init__(self, id, calls):
+        self.id = id
+        self.calls = calls
+
+class attribute_call_node(expression_node):
     def __init__(self, id, calls):
         self.id = id
         self.calls = calls
