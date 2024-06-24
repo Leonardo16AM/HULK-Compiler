@@ -21,8 +21,6 @@ class TokenType():
     STRING = string
     NUMBER = num
     BOOLEAN = bool
-    PI = 'PI'
-
     PLUS = plus
     MINUS = minus
     STAR = star
@@ -60,7 +58,6 @@ class TokenType():
     EXTENDS = extends
     TYPE = type_t
     INHERITS = inherits
-    BASE = 'BASE'
 
     UNTERMINATED_STRING = 'UNTERMINATED_STRING'
     ESCAPED_CHAR = 'ESCAPED_CHAR'
@@ -87,8 +84,8 @@ def hulk_tokens():
         (TokenType.WHILE, "while"), (TokenType.FOR, "for"),
         (TokenType.NEW, "new"), (TokenType.IS, "is"), (TokenType.AS, "as"),
         (TokenType.PROTOCOL, "protocol"), (TokenType.EXTENDS, "extends"),
-        (TokenType.TYPE, "type"), (TokenType.INHERITS, "inherits"), (TokenType.BASE, "base"),
-        (TokenType.BOOLEAN, "true|false"), (TokenType.PI, "PI")]
+        (TokenType.TYPE, "type"), (TokenType.INHERITS, "inherits"), 
+        (TokenType.BOOLEAN, "true|false")]
 
     nonzero_digits = '|'.join(str(n) for n in range(1, 10))
     digits = '|'.join(str(n) for n in range(10))

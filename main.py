@@ -6,6 +6,7 @@ from src.grammar.hulk_grammar import G
 # from src.parser.LR1_parser import LR1Parser
 from src.cmp.tools.parsing import LR1Parser
 from src.cmp.evaluation import evaluate_reverse_parse
+from src.semantic.ast_printer_visitor import *
 
 
     
@@ -33,6 +34,10 @@ def pipeline(file_path):
     tokens=lexer(code)
     print("TOKENS:" , tokens)
 
+    for t in tokens:
+        #imprime la linea y columna del token
+        print(t,t.token_type,t.row,t.column)
+
     print(colored("=========================================PARSING===================================================",'blue'))
 
     if os.path.isfile("src/lang/hulk_parser.pkl"):
@@ -51,13 +56,20 @@ def pipeline(file_path):
 
     print("PARSE:",colored(parse,"magenta"))
 
+    ast=evaluate_reverse_parse(parse,operations,tokens)
+
+    print(ast)
+
+    formatter = FormatVisitor()
+    print(formatter.visit(ast))
+
     print(colored("========================================CHECKING_SEMATICS========================================",'blue'))
     print(colored("========================================GERNERATING_CODE=========================================",'blue'))
     print(colored("============================================FINISHED=============================================",'blue'))
 
 
 if __name__ == '__main__':
-    pipeline("examples/print.hulk")
+    pipeline("examples/custom_test.hulk")
 
 
     
