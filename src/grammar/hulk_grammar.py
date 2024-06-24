@@ -78,7 +78,6 @@ global_expr %= expr_block, lambda h, s: s[1]
 statement %= single_expr + semicolon, lambda h, s: s[1]
 
 expr_block %= lcurly + statement_list + rcurly, lambda h, s: expression_block_node(s[2])
-expr_block %= lcurly + statement_list + rcurly, lambda h, s: expression_block_node(s[2])
 
 statement_list %= statement, lambda h, s: [s[1]]
 statement_list %= expr_block, lambda h, s: [s[1]]
