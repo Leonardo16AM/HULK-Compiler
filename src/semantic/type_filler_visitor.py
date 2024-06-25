@@ -79,7 +79,7 @@ class type_filler:
             self.current_type = ErrorType()
             return
         
-        if node.parent in ['num', 'bool', 'string']:
+        if node.parent in ['Number', 'Bool', 'String']:
             self.errors.append(error("SEMANTIC ERROR",f'Type {node.id} is inheriting from a forbidden type',line=node.line,verbose=False))
         elif node.parent is not None:
             try:

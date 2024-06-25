@@ -21,15 +21,15 @@ class type_finder:
 
         object_type = self.context.create_type('Object')
 
-        number_type = self.context.create_type('num')
+        number_type = self.context.create_type('Number')
         number_type.set_parent(object_type)
 
-        bool_type = self.context.create_type('bool')
+        bool_type = self.context.create_type('Bool')
         bool_type.set_parent(object_type)
 
 
         
-        string_type = self.context.create_type('string')
+        string_type = self.context.create_type('String')
         string_type.set_parent(object_type)
         string_type.define_method('size', [], [], number_type)
         string_type.define_method('next', [], [], bool_type)

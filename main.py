@@ -3,8 +3,8 @@ from termcolor import colored
 from src.utils.preprocess import *
 from src.lexer.hulk_lexer import hulk_lexer
 from src.grammar.hulk_grammar import G
-from src.parser.LR1_parser import LR1Parser
-# from src.cmp.tools.parsing import LR1Parser
+# from src.parser.LR1_parser import LR1Parser
+from src.cmp.tools.parsing import LR1Parser
 from src.cmp.evaluation import evaluate_reverse_parse
 from src.semantic.ast_printer_visitor import *
 from src.semantic.semantic_check import semantic_check
