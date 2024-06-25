@@ -18,12 +18,12 @@ class FormatVisitor:
     @visitor.when(function_declaration_node)
     def visit(self, node, tabs=0):
 
-        params = ', '.join(str(param) for param in node.params)
-        ans = '\t' * tabs + f'\\__FunctionDeclarationNode: def {node.id}({params}) -> {node.return_type}'
-        body = '\t' * (tabs+1) + f'None'
+        ans = '\t' * tabs + f'\\__FunctionDeclarationNode: def {node.id}(<params>) -> {node.return_type}'
+        params = '\t' * (tabs+1) + 'params:\n' + '\n'.join(self.visit(param, tabs+1) for param in node.params)
+        body = '\t' * (tabs+1) + f'This function has no body'
         if node.body:
-            body = self.visit(node.body, tabs + 1)
-        return f'{ans}\n{body}'
+            body = '\t' * (tabs+1) + 'Body:\n'+self.visit(node.body, tabs + 1)
+        return f'{ans}\n{params}\n{body}'
 
     @visitor.when(type_declaration_node)
     def visit(self, node, tabs=0):

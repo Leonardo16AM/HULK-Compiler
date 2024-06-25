@@ -12,7 +12,7 @@ from src.semantic.ast_printer_visitor import *
 from src.semantic.semantic_check import semantic_check
 
     
-def pipeline(file_path="examples/print.hulk",verbose=True):
+def pipeline(file_path="examples/custom_test.hulk",verbose=True):
     
     if verbose:print(colored("========================================LOADING FILE===============================================",'blue'))
     try:
@@ -63,7 +63,7 @@ def pipeline(file_path="examples/print.hulk",verbose=True):
 
 def main():
     parser = argparse.ArgumentParser(description='Process a file path with optional verbosity.')
-    parser.add_argument('file_path', nargs='?', type=str, default="examples/print.hulk", help='Path to the file to be processed')
+    parser.add_argument('file_path', nargs='?', type=str, default="examples/custom_test.hulk", help='Path to the file to be processed')
     parser.add_argument('-v', dest='verbose', action='store_true', help='Enable verbose mode')
     parser.add_argument('-nv', dest='verbose', action='store_false', help='Disable verbose mode')
     parser.set_defaults(verbose=True)
