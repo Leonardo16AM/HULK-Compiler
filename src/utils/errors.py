@@ -9,7 +9,7 @@ def clean_text(text):
     text = re.sub(r'[\r\n\t]', ' ', text)
     return text
 
-def error(type, message, code="",line="", stop=False):
+def error(type, message, code="",line="", stop=True,verbose="True"):
     try:
         columns, _ = os.get_terminal_size()
     except OSError:
@@ -22,12 +22,11 @@ def error(type, message, code="",line="", stop=False):
         code = code[:47] + '...'
     
     details = [
-        colored(type, 'yellow', attrs=['bold']) + ": ",
-        message
+        colored(type, 'yellow', attrs=['bold']) + ": "+message
     ]
     
     if len(line) > 0:
-        details.append("On: "+line)
+        details.append("On line: "+line)
 
     if len(code) > 0:
         details.append("Details: \x1B[3m" + code + "\x1B[23m")
@@ -45,19 +44,26 @@ def error(type, message, code="",line="", stop=False):
     vertical = '║'
 
     border_horizontal = top_left + (horizontal * (width + 2)) + top_right
-    print(colored(border_horizontal, 'red'))
+    
+    to_print=''
+    to_print+=colored(border_horizontal, 'red')+'\n'
 
     for detail in details:
         clean_detail = clean_text(detail)
         if len(clean_detail) > width:
             detail = detail[:width - 3] + '...'
 
-        print(colored(vertical + ' ', 'red'), end='')
-        print(detail.ljust(width + len(detail) - len(clean_detail)), end='')
-        print(colored(' ' + vertical, 'red'))
+        to_print+=colored(vertical + ' ', 'red')
+        to_print+=detail.ljust(width + len(detail) - len(clean_detail))
+        to_print+=colored(' ' + vertical, 'red')+'\n'
 
     border_horizontal = bottom_left + (horizontal * (width + 2)) + bottom_right
-    print(colored(border_horizontal, 'red'))
+    to_print+=colored(border_horizontal, 'red')
+
+    if verbose:
+        print(to_print)
+    else:
+        return to_print
 
     if stop:
         sys.exit(1)

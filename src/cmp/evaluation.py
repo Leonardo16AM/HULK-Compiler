@@ -8,10 +8,14 @@ def evaluate_reverse_parse(right_parse, operations, tokens):
     right_parse = iter(right_parse)
     tokens = iter(tokens)
     stack = []
+
+    current_line = None
+
     for operation in operations:
         if operation == ShiftReduceParser.SHIFT:
             token = next(tokens)
             stack.append(token.lex)
+            current_line = str(token.row)
         elif operation == ShiftReduceParser.REDUCE:
             production = next(right_parse)
             head, body = production
@@ -22,9 +26,14 @@ def evaluate_reverse_parse(right_parse, operations, tokens):
             if len(body):
                 synteticed = [None] + stack[-len(body):]
                 value = rule(None, synteticed)
+                if hasattr(value, 'line'):
+                    value.line = current_line
                 stack[-len(body):] = [value]
             else:
-                stack.append(rule(None, None))
+                value = rule(None, None)
+                if hasattr(value, 'line'):
+                    value.line = current_line
+                stack.append(value)
         else:
             raise Exception('Invalid action!!!')
 
