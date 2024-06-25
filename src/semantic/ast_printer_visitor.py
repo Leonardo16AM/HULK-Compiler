@@ -17,14 +17,17 @@ class FormatVisitor:
 
     @visitor.when(function_declaration_node)
     def visit(self, node, tabs=0):
-        params = ', '.join(str(node.params))
+
+        params = ', '.join(str(param) for param in node.params)
         ans = '\t' * tabs + f'\\__FunctionDeclarationNode: def {node.id}({params}) -> {node.return_type}'
-        body = self.visit(node.body, tabs + 1)
+        body = '\t' * (tabs+1) + f'None'
+        if node.body:
+            body = self.visit(node.body, tabs + 1)
         return f'{ans}\n{body}'
 
     @visitor.when(type_declaration_node)
     def visit(self, node, tabs=0):
-        params = ', '.join(node.params)
+        params = ', '.join(str(param) for param in node.params)
         parent = f" : {node.parent}" if node.parent else ""
         ans = '\t' * tabs + f'\\__TypeDeclarationNode: class {node.id}({params}){parent}'
         features = '\n'.join(self.visit(feature, tabs + 1) for feature in node.features)
@@ -32,14 +35,16 @@ class FormatVisitor:
 
     @visitor.when(protocol_declaration_node)
     def visit(self, node, tabs=0):
-        ans = '\t' * tabs + f'\\__ProtocolDeclarationNode: protocol {node.id}'
+        ans = '\t' * tabs + f'\\__ProtocolDeclarationNode: protocol {node.id} extends {node.parent}'
         functions = '\n'.join(self.visit(func, tabs + 1) for func in node.functions)
         return f'{ans}\n{functions}'
 
     @visitor.when(variable_declaration_node)
     def visit(self, node, tabs=0):
-        value = self.visit(node.value, tabs + 1)
-        ans = '\t' * tabs + f'\\__VariableDeclarationNode: let {node.id}: {node.type_id} ='
+        value = '\t' * (tabs+1) + f'None'
+        if node.value:
+            value = self.visit(node.value, tabs + 1)
+        ans = '\t' * tabs + f'\\__VariableDeclarationNode: {node.id}: {node.type_id} ='
         return f'{ans}\n{value}'
 
     @visitor.when(expression_block_node)
@@ -192,14 +197,14 @@ class FormatVisitor:
 
     @visitor.when(string_node)
     def visit(self, node, tabs=0):
-        return '\t' * tabs + f'\\__StringNode: "{node.value}"'
+        return '\t' * tabs + f'\\__StringNode: {node.value}'
 
     @visitor.when(index_node)
     def visit(self, node, tabs=0):
         ans = '\t' * tabs + f'\\__IndexNode:'
-        vector = self.visit(node.vector, tabs + 1)
+        expr = self.visit(node.expr, tabs + 1)
         index = self.visit(node.index, tabs + 1)
-        return f'{ans}\n{vector}\n{index}'
+        return f'{ans}\n{expr}\n{index}'
 
     @visitor.when(as_node)
     def visit(self, node, tabs=0):
@@ -209,14 +214,24 @@ class FormatVisitor:
 
     @visitor.when(property_call_node)
     def visit(self, node, tabs=0):
-        ans = '\t' * tabs + f'\\__PropertyCallNode: {node.id}(<calls>)'
-        calls = '\n'.join(self.visit(call, tabs + 1) for call in node.calls)
-        return f'{ans}\n{calls}'
+        ans = '\t' * tabs + f'\\__PropertyCallNode: \n{self.visit(node.expr, tabs + 1)}'
+        func =  self.visit(node.func, tabs + 1)
+        return f'{ans}\n{func}'
+    
+    @visitor.when(attribute_call_node)
+    def visit(self, node, tabs=0):
+        ans = '\t' * tabs + f'\\__AttributeCallNode: {node.id}\n{self.visit(node.expr, tabs + 1)}'
+        return f'{ans}'
 
     @visitor.when(if_node)
     def visit(self, node, tabs=0):
         ans = '\t' * tabs + f'\\__IfNode'
-        conditions_bodies = '\n'.join(self.visit(cond_body, tabs + 1) for cond_body in node.conditions_bodies)
+        print('==================================')
+        for cond_body in node.conditions_bodies:
+            print(cond_body)
+        print('==================================')
+        #conditions_bodies = '\n'.join(str(cond_body) for cond_body in node.conditions_bodies)
+        conditions_bodies = '\n'.join(str(self.visit(cond_body[0], tabs + 1)) + '\n' + str(self.visit(cond_body[1], tabs + 1)) for cond_body in node.conditions_bodies)
         return f'{ans}\n{conditions_bodies}'
 
     @visitor.when(vector_node)
@@ -233,7 +248,7 @@ class FormatVisitor:
 
     @visitor.when(assignment_node)
     def visit(self, node, tabs=0):
-        ans = '\t' * tabs + f'\\__AssignmentNode: {node.id} ='
+        ans = '\t' * tabs + f'\\__AssignmentNode: \n{self.visit(node.var, tabs+1)}'
         expr = self.visit(node.expr, tabs + 1)
         return f'{ans}\n{expr}'
 
@@ -253,10 +268,11 @@ class FormatVisitor:
 
     @visitor.when(for_node)
     def visit(self, node, tabs=0):
-        ans = '\t' * tabs + f'\\__ForNode: for {node.variable} in <expr>'
+        ans = '\t' * tabs + f'\\__ForNode:'
+        vars = self.visit(node.variable, tabs + 1)
         expr = self.visit(node.expr, tabs + 1)
         body = self.visit(node.body, tabs + 1)
-        return f'{ans}\n{expr}\n{body}'
+        return f'{ans}\n{vars}\n{expr}\n{body}'
 
     @visitor.when(vector_comprehension_node)
     def visit(self, node, tabs=0):

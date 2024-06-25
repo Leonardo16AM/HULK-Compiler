@@ -14,8 +14,8 @@ class TokenType():
     SEMICOLON = semicolon
     ARROW = arrow
     DOUBLE_BAR = bar_bar
-    ASSIGMENT = assignment_op
-    DEST_ASSIGMENT = equal
+    ASSIGMENT = equal
+    DEST_ASSIGMENT = assignment_op
 
     IDENTIFIER = id
     STRING = string

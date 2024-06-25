@@ -1,9 +1,7 @@
-import src.cmp.visitor as visitor
 from src.cmp.ast import *
-from abc import ABC, abstractmethod
 
 class node:
-    pass
+    line = '0'
 
 
 class program_node(node):
@@ -33,9 +31,10 @@ class type_declaration_node(declaration_node):
         self.parent = parent
 
 class protocol_declaration_node(declaration_node):
-    def __init__(self, id, functions):
+    def __init__(self, id, functions, parent):
         self.id = id
         self.functions = functions
+        self.parent = parent
 
 class variable_declaration_node(declaration_node):
     def __init__(self, id, type_id, value):
@@ -43,18 +42,15 @@ class variable_declaration_node(declaration_node):
         self.type_id = type_id
         self.value = value
 
-class protocol_declaration_node(declaration_node):
-    def __init__(self, id, functions):
-        self.id = id
-        self.functions = functions
 
 class expression_block_node(expression_node):
     def __init__(self, expressions):
         self.expressions = expressions
 
 class concatenation_node(expression_node):
-    def __init__(self, left, right):
+    def __init__(self, left, middle ,right):
         self.left = left
+        self.middle = middle
         self.right = right
 
 class and_node(expression_node):
@@ -162,8 +158,8 @@ class string_node(expression_node):
         self.value = value
 
 class index_node(expression_node):
-    def __init__(self, vector, index):
-        self.vector = vector
+    def __init__(self, expr, index):
+        self.expr = expr
         self.index = index
 
 class as_node(expression_node):
@@ -172,14 +168,14 @@ class as_node(expression_node):
         self.type_id = type_id
 
 class property_call_node(expression_node):
-    def __init__(self, id, calls):
-        self.id = id
-        self.calls = calls
+    def __init__(self, expr, func):
+        self.expr = expr
+        self.func = func
 
 class attribute_call_node(expression_node):
-    def __init__(self, id, calls):
+    def __init__(self, expr, id):
+        self.expr = expr
         self.id = id
-        self.calls = calls
 
 class if_node(expression_node):
     def __init__(self, conditions_bodies):
@@ -195,8 +191,8 @@ class new_node(expression_node):
         self.args = args
 
 class assignment_node(expression_node):
-    def __init__(self, id, expr):
-        self.id = id
+    def __init__(self, var, expr):
+        self.var = var
         self.expr = expr
 
 class let_node(expression_node):
