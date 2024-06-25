@@ -1,4 +1,19 @@
-{
-    print("The meaning of life is " @ 42);
-    print(-sin(2 * PI) ^ 2 + cos(3 * PI / log(4, 64)));
+type animal{
+    xa:num=12;
+    xa:num=13;
 }
+type perro inherits animal{
+    xb:num=12;
+    xc:miloco=12;
+}
+
+type perro{
+    xd:num=12;
+}
+
+
+type animal{
+    xe:num=12;
+}
+
+print(43);

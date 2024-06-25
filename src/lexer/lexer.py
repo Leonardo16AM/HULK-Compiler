@@ -93,7 +93,7 @@ class lexer:
                 
                 text = text[len(lexeme):]
             else:
-                error("LEXER ERROR","Tokenization error",text,f" row {row}, column {column}",True)
+                error("LEXER ERROR","Tokenization error",text,str(row),True)
         yield '$', self.eof,row,column
 
     def _escapable(self,text):
