@@ -27,11 +27,12 @@ class FormatVisitor:
 
     @visitor.when(type_declaration_node)
     def visit(self, node, tabs=0):
-        params = ', '.join(str(param) for param in node.params)
-        parent = f" : {node.parent}" if node.parent else ""
-        ans = '\t' * tabs + f'\\__TypeDeclarationNode: class {node.id}({params}){parent}'
-        features = '\n'.join(self.visit(feature, tabs + 1) for feature in node.features)
-        return f'{ans}\n{features}'
+        parent = f" : {node.parent}" if node.parent else "None"
+        ans = '\t' * tabs + f'\\__TypeDeclarationNode: class {node.id}(<params>) inherits {parent}(<args>)'
+        params = '\t' * (tabs+1) + 'params:\n'+'\n'.join(self.visit(param, tabs + 1) for param in node.params)
+        args = '\t' * (tabs+1) + 'args:\n'+'\n'.join(self.visit(arg, tabs + 1) for arg in node.args)
+        features = '\t' * (tabs+1) + 'features:\n'+'\n'.join(self.visit(feature, tabs + 1) for feature in node.features)
+        return f'{ans}\n{params}\n{args}\n{features}'
 
     @visitor.when(protocol_declaration_node)
     def visit(self, node, tabs=0):
@@ -184,7 +185,7 @@ class FormatVisitor:
     @visitor.when(function_call_node)
     def visit(self, node, tabs=0):
         ans = '\t' * tabs + f'\\__FunctionCallNode: {node.id}(<args>)'
-        args = '\n'.join(self.visit(arg, tabs + 1) for arg in node.args)
+        args = '\t' * (tabs+1) + 'args:\n'+'\n'.join(self.visit(arg, tabs + 1) for arg in node.args)
         return f'{ans}\n{args}'
 
     @visitor.when(number_node)
@@ -226,11 +227,6 @@ class FormatVisitor:
     @visitor.when(if_node)
     def visit(self, node, tabs=0):
         ans = '\t' * tabs + f'\\__IfNode'
-        print('==================================')
-        for cond_body in node.conditions_bodies:
-            print(cond_body)
-        print('==================================')
-        #conditions_bodies = '\n'.join(str(cond_body) for cond_body in node.conditions_bodies)
         conditions_bodies = '\n'.join(str(self.visit(cond_body[0], tabs + 1)) + '\n' + str(self.visit(cond_body[1], tabs + 1)) for cond_body in node.conditions_bodies)
         return f'{ans}\n{conditions_bodies}'
 
