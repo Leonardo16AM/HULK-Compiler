@@ -26,8 +26,8 @@ class TokenType():
     STAR = star
     DIV = div
     MOD = mod
-    POWER = power
-    POWER2 = power
+    POWER = caret
+    POWER2 = star_star
 
     AND = and_t
     OR = or_t

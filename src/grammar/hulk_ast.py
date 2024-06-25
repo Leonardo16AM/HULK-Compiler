@@ -24,11 +24,12 @@ class function_declaration_node(declaration_node):
         self.body = body
 
 class type_declaration_node(declaration_node):
-    def __init__(self, id, params, features, parent=None):
+    def __init__(self, id, params, parent, args, features):
         self.id = id
         self.params = params
-        self.features = features
         self.parent = parent
+        self.args = args
+        self.features = features
 
 class protocol_declaration_node(declaration_node):
     def __init__(self, id, functions, parent):

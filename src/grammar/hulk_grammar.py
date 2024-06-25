@@ -5,24 +5,57 @@ G = Grammar()
 
 # region Non Terminals
 program = G.NonTerminal('program', startSymbol=True)
-dec_list, declaration, function_dec, type_dec, protocol_dec, global_expr = G.NonTerminals('dec_list declaration function_dec type_dec protocol_dec global_expr')
-statement, expression, expr_block, single_expr, statement_list, parameters = G.NonTerminals('statement expression expr_block single_expr statement_list parameters')
-parameter, parameter_list, feature_list, feature, method_dec = G.NonTerminals('parameter parameter_list feature_list feature method_dec')
-function_post, function_post_list, parameter_post, parameters_post, parameter_post_list = G.NonTerminals('function_post function_post_list parameter_post parameters_post parameter_post_list')
-single_expr, single_expr_lv2, arithmetic_expr, boolean_expr, string_expr = G.NonTerminals('single_expr single_expr_lv2 arithmetic_expr boolean_expr string_expr')
-boolean_expr_lv2, boolean_expr_lv3, comparation, var, molecule = G.NonTerminals('boolean_expr_lv2 boolean_expr_lv3 comparation var molecule')
-arithmetic_expr_lv2, arithmetic_expr_lv3, arithmetic_expr_lv4 = G.NonTerminals('arithmetic_expr_lv2, arithmetic_expr_lv3, arithmetic_expr_lv4')
-elif_branch, else_branch, var_list, var_list_element, func_call_list, attribute_call_list = G.NonTerminals('elif_branch else_branch var_list var_list_element func_call_list attribute_call_list')
-concat_list, arg_list, func_call, type_instance, args, general_atom = G.NonTerminals('concat_list arg_list func_call type_instance args general_atom')
+dec_list, declaration, function_dec, type_dec, protocol_dec, global_expr = G.NonTerminals(
+    'dec_list declaration function_dec type_dec protocol_dec global_expr')
+
+statement, expr_block, single_expr, statement_list, parameters = G.NonTerminals(
+    'statement expr_block single_expr statement_list parameters')
+
+parameter_list, feature_list, feature, method_dec = G.NonTerminals(
+    'parameter_list feature_list feature method_dec')
+
+function_post, function_post_list, parameters_post, parameter_post_list = G.NonTerminals(
+    'function_post function_post_list parameters_post parameter_post_list')
+
+single_expr, single_expr_lv2, arithmetic_expr, boolean_expr, string_expr = G.NonTerminals(
+    'single_expr single_expr_lv2 arithmetic_expr boolean_expr string_expr')
+
+boolean_expr_lv2, boolean_expr_lv3, comparation, molecule = G.NonTerminals(
+    'boolean_expr_lv2 boolean_expr_lv3 comparation molecule')
+
+arithmetic_expr_lv2, arithmetic_expr_lv3, arithmetic_expr_lv4 = G.NonTerminals(
+    'arithmetic_expr_lv2 arithmetic_expr_lv3 arithmetic_expr_lv4')
+
+elif_branch, var_list = G.NonTerminals('elif_branch var_list')
+
+arg_list, func_call, args, general_atom = G.NonTerminals(
+    'arg_list func_call args general_atom')
 # endregion
 
-#region Terminals
-dot, colon, semicolon, comma, opar, cpar, arrow, lcurly, rcurly, at, double_at, assignment_op, obracket, cbracket, bar_bar = G.Terminals('. : ; , ( ) => { } @ @@ := [ ] ||')
+# region Terminals
+dot, colon, semicolon, comma, opar, cpar, arrow, lcurly, rcurly = G.Terminals(
+    '. : ; , ( ) => { }')
+
+at, double_at, assignment_op, obracket, cbracket, bar_bar = G.Terminals(
+    '@ @@ := [ ] ||')
+
 and_t, or_t = G.Terminals('& |')
-equal, plus, minus, star, div, mod, power, not_t, less, greater, less_eq, greater_eq, eq_eq, dif = G.Terminals('= + - * / % ^ ! < > <= >= == !=')
-if_t, elif_t, else_t, let, in_t, while_t, for_t, is_t, type_t, function, inherits, protocol, extends, new, as_t = G.Terminals('if elif else let in while for is type function inherits protocol extends new as')
-id, num, type_id, string, bool, self = G.Terminals('id num type_id string bool self')
+
+equal, plus, minus, star, star_star, div, mod, caret, not_t = G.Terminals(
+    '= + - * ** / % ^ !')
+
+less, greater, less_eq, greater_eq, eq_eq, dif = G.Terminals(
+    '< > <= >= == !=')
+
+if_t, elif_t, else_t, let, in_t, while_t, for_t, is_t = G.Terminals(
+    'if elif else let in while for is')
+
+type_t, function, inherits, protocol, extends, new, as_t = G.Terminals(
+    'type function inherits protocol extends new as')
+
+id, num, string, bool = G.Terminals('id num string bool')
 # endregion
+
 
 # region Productions
 program %= dec_list + global_expr, lambda h, s: program_node(s[1], s[2])
@@ -47,15 +80,17 @@ method_dec %= id + opar + parameters + cpar + colon + id + expr_block, lambda h,
 parameters %= G.Epsilon, lambda h, s: []
 parameters %= parameter_list, lambda h, s: s[1]
 
-parameter_list %= id, lambda h, s: [(s[1], None)]
-parameter_list %= id + colon + id, lambda h, s: [(s[1], s[3])]
-parameter_list %= id + comma + parameter_list, lambda h, s: [(s[1], None)] + s[3]
-parameter_list %= id + colon + id + comma + parameter_list, lambda h, s: [(s[1], s[3])] + s[5]
+parameter_list %= id, lambda h, s: [variable_declaration_node(s[1], None, None)]
+parameter_list %= id + colon + id, lambda h, s: [variable_declaration_node(s[1], s[3], None)]
+parameter_list %= id + comma + parameter_list, lambda h, s: [variable_declaration_node(s[1], None, None)] + s[3]
+parameter_list %= id + colon + id + comma + parameter_list, lambda h, s: [variable_declaration_node(s[1], s[3], None)] + s[5]
 
-type_dec %= type_t + id + lcurly + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], [], s[4], None)
-type_dec %= type_t + id + inherits + id + lcurly + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], [], s[6], s[4])
-type_dec %= type_t + id + opar + parameters + cpar + lcurly + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], s[4], s[7], None)
-type_dec %= type_t + id + inherits + id + opar + parameters + cpar + lcurly + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], s[6], s[9], s[4])
+type_dec %= type_t + id + lcurly + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], [], None, [], s[4])
+type_dec %= type_t + id + opar + parameters + cpar + lcurly + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], s[4], None, [], s[7])
+type_dec %= type_t + id + inherits + id + lcurly + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], [], s[4], [], s[6])
+type_dec %= type_t + id + inherits + id  + opar + args + cpar + lcurly + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], [], s[4], s[6], s[9])
+type_dec %= type_t + id + opar + parameters + cpar + inherits + id + lcurly + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], s[4], s[7], [], s[9])
+type_dec %= type_t + id + opar + parameters + cpar + inherits + id + opar + args + cpar + lcurly + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], s[4], s[7], s[9], s[12])
 
 feature_list %= G.Epsilon, lambda h, s: []
 feature_list %= feature + feature_list, lambda h, s: [s[1]] + s[2]
@@ -75,17 +110,13 @@ function_post %= id + opar + parameters_post + cpar + colon + id + semicolon, la
 parameters_post %= G.Epsilon, lambda h, s: []
 parameters_post %= parameter_post_list, lambda h, s: s[1]
 
-parameter_post_list %= id + colon + id, lambda h, s: [(s[1], s[3])]
-parameter_post_list %= id + colon + id + comma + parameter_post_list, lambda h, s: [(s[1], s[3])] + s[5]
+parameter_post_list %= id + colon + id, lambda h, s: [variable_declaration_node(s[1], s[3], None)]
+parameter_post_list %= id + colon + id + comma + parameter_post_list, lambda h, s: [variable_declaration_node(s[1], s[3], None)] + s[5]
 
 global_expr %= statement, lambda h, s: s[1]
 global_expr %= expr_block, lambda h, s: s[1]
 
 statement %= single_expr + semicolon, lambda h, s: s[1]
-# statement %= expr_block , lambda h, s: s[1]
-
-# expression %= single_expr, lambda h, s: s[1]
-# expression %= expr_block, lambda h, s: s[1]
 
 expr_block %= lcurly + statement_list + rcurly, lambda h, s: expression_block_node(s[2])
 
@@ -147,7 +178,8 @@ arithmetic_expr_lv3 %= arithmetic_expr_lv4, lambda h, s: s[1]
 arithmetic_expr_lv3 %= minus + arithmetic_expr_lv3, lambda h, s: negative_node(s[2])
 
 arithmetic_expr_lv4 %= molecule, lambda h, s: s[1]
-arithmetic_expr_lv4 %= molecule + power + arithmetic_expr_lv4, lambda h, s: power_node(s[1], s[3])
+arithmetic_expr_lv4 %= molecule + caret + arithmetic_expr_lv4, lambda h, s: power_node(s[1], s[3])
+arithmetic_expr_lv4 %= molecule + star_star + arithmetic_expr_lv4, lambda h, s: power_node(s[1], s[3])
 
 molecule %= general_atom, lambda h, s: s[1]
 molecule %= molecule + dot + func_call, lambda h, s: property_call_node(s[1], s[3])
@@ -162,18 +194,7 @@ general_atom %= func_call, lambda h, s: s[1]
 general_atom %= expr_block, lambda h, s: s[1]
 general_atom %= opar + single_expr + cpar, lambda h, s: s[2]
 general_atom %= obracket + args + cbracket, lambda h, s: vector_node(s[2])
-# # general_atom %= general_atom + dot + func_call, lambda h, s: property_call_node(s[1], s[3])
 general_atom %= obracket + single_expr + bar_bar + id + in_t + single_expr + cbracket, lambda h, s: vector_comprehension_node(variable_declaration_node(s[4], None, None), s[2], s[6])
-# # general_atom %= id + attribute_call_list, lambda h, s: attribute_call_node(s[1], s[2])
-
-# # func_call_list %= dot + func_call, lambda h, s: [s[2]]
-# # func_call_list %= func_call_list + dot + func_call, lambda h, s: s[1] + [s[3]]
-
-# # var %= id, lambda h, s: [s[1]]
-# # var %= id + dot + var, lambda h, s: s[1] + [s[3]]
-
-# # attribute_call_list %= dot + id, lambda h, s: [s[2]]
-# # attribute_call_list %= dot + id + attribute_call_list, lambda h, s: [s[2]] + s[3]
 
 func_call %= id + opar + args + cpar, lambda h, s: function_call_node(s[1], s[3])
 
