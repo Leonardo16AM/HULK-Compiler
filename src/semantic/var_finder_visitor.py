@@ -32,8 +32,10 @@ class var_finder:
         function_scope = scope.create_child()
         
         for param in node.params:
-            function_scope.define_variable(param.id, self.context.get_type(param.type_id))
-
+            try:
+                function_scope.define_variable(param.id, self.context.get_type(param.type_id))
+            except SemanticError as e:
+                self.errors.append(error("SEMANTIC ERROR",str(e)+f' On function {node.id}', line=node.line, verbose=False))
         self.visit(node.body, function_scope)
 
     @visitor.when(type_declaration_node)
@@ -58,7 +60,7 @@ class var_finder:
         try:
             var_type = self.context.get_type(node.type_id)
         except SemanticError as e:
-            self.errors.append(error("SEMANTIC ERROR", str(e), line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", str(e)+f' On varible {node.id}', line=node.line, verbose=False))
             var_type = None
 
         scope.define_variable(node.id, var_type)

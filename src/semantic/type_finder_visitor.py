@@ -19,8 +19,9 @@ class type_finder:
 
         
 
+        self.context.create_type('<void>')
+        self.context.create_type('None')
         object_type = self.context.create_type('Object')
-
         number_type = self.context.create_type('Number')
         number_type.set_parent(object_type)
 
