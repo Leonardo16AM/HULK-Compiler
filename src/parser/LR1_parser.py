@@ -4,25 +4,31 @@ from src.grammar.compute_firsts import compute_local_first
 from src.grammar.compute_firsts import compute_firsts
 from src.cmp.automata import State, multiline_formatter
 from src.parser.shift_reduce import ShiftReduceParser
+from termcolor import colored
+from src.utils.errors import *
 
-#region expand
-def expand(item, firsts):
+
+
+def expand(G, item: Item, firsts, items: set[Item]):
     next_symbol = item.NextSymbol
     if next_symbol is None or not next_symbol.IsNonTerminal:
         return []
-    
-    lookaheads = ContainerSet()
-    
+
+    lookaheads = set()
+
     for preview in item.Preview():
-        for x in compute_local_first(firsts,preview):
-            lookaheads.add(x)
+        lookaheads.update(compute_local_first( firsts, preview))
 
-    assert not lookaheads.contains_epsilon
+    for production in next_symbol.productions:
+        new_item = Item(production, 0, lookaheads)
+
+        if new_item not in items:
+            items.add(new_item)
+            expand(G, new_item, firsts, items)
+
+    return items
 
 
-    return [Item(p, 0, lookaheads) for p in next_symbol.productions]     
-
-#region compress
 def compress(items):
     centers = {}
 
@@ -33,107 +39,105 @@ def compress(items):
         except KeyError:
             centers[center] = lookaheads = set()
         lookaheads.update(item.lookaheads)
-    
-    return { Item(x.production, x.pos, set(lookahead)) for x, lookahead in centers.items() }
+
+    return {Item(x.production, x.pos, lookahead) for x, lookahead in centers.items()}
 
 
-#region closure_lr1
-def closure_lr1(items, firsts):
+def closure_lr1(G, items, firsts):
     closure = ContainerSet(*items)
-    
-    changed = True
-    while changed:
-        changed = False
-        
-        new_items = ContainerSet()
-        for item in closure:
-            new_items.extend(expand(item, firsts))
 
+    new_items = ContainerSet()
 
-        changed = closure.update(new_items)
-        
+    for item in items:
+        new_items.set.update(expand(G, item, firsts, set()))
+
+    closure.update(new_items)
+
     return compress(closure)
 
-#region goto_lr1
-def goto_lr1(items, symbol, firsts=None, just_kernel=False):
+
+def goto_lr1(G, items, symbol, firsts=None, just_kernel=False):
     assert just_kernel or firsts is not None, '`firsts` must be provided if `just_kernel=False`'
     items = frozenset(item.NextItem() for item in items if item.NextSymbol == symbol)
-    return items if just_kernel else closure_lr1(items, firsts)
+    return items if just_kernel else closure_lr1(G, items, firsts)
 
 
-
-
-#region build_LR1_automaton
 def build_LR1_automaton(G):
     assert len(G.startSymbol.productions) == 1, 'Grammar must be augmented'
-    
+
     firsts = compute_firsts(G)
-    firsts[G.EOF] = ContainerSet(G.EOF)
-    
+    firsts[G.EOF] = {G.EOF}
+
     start_production = G.startSymbol.productions[0]
     start_item = Item(start_production, 0, lookaheads=(G.EOF,))
     start = frozenset([start_item])
-    
-    closure = closure_lr1(start, firsts)
-    automaton = State(frozenset(closure), True)
-    
-    pending = [ start ]
-    visited = { start: automaton }
-    
+
+    closure = frozenset(closure_lr1(G, start, firsts))
+    automaton = State(closure, final = any(item.IsReduceItem for item in closure))
+
+    pending = [closure]
+    visited = {closure: automaton}
+
     while pending:
         current = pending.pop()
         current_state = visited[current]
-        
-        for symbol in G.terminals + G.nonTerminals:
-            next_state = goto_lr1(current_state.state, symbol, firsts)
-            
-            if not next_state:
-                continue
-            
-            closure= frozenset(next_state)
-            try:
-                next_state = visited[closure]
-            except KeyError:
-                pending.append(closure)
-                next_state = visited[closure] = State(closure, True)
 
-            
-            current_state.add_transition(symbol.Name, next_state)
-    
+        for symbol in G.terminals + G.nonTerminals:
+            closure = frozenset(goto_lr1(G, current, symbol, firsts))
+
+            if len(closure) > 0:
+                if closure not in visited:
+                    visited[closure] = State(closure, final = any(item.IsReduceItem for item in closure))
+                    pending.append(closure)
+
+                current_state.add_transition(symbol.Name, visited[closure])
+
     automaton.set_formatter(multiline_formatter)
     return automaton
 
-#region LR1Parser
+
 class LR1Parser(ShiftReduceParser):
-
-
     def _build_parsing_table(self):
         G = self.G.AugmentedGrammar(True)
-        
-        automaton = build_LR1_automaton(G)
-        for i, node in enumerate(automaton):
-            if self.verbose: print(i, '\t', '\n\t '.join(str(x) for x in node.state), '\n')
-            node.idx = i
 
-        for node in automaton:
-            idx = node.idx
-            for item in node.state:           
-                if item.NextSymbol is not None:
-                    if item.NextSymbol.IsTerminal:
-                        next_state = node.get(item.NextSymbol.Name)
-                        self._register(self.action, (idx, item.NextSymbol), (ShiftReduceParser.SHIFT,next_state.idx))
-                    else:
-                        next_state = node.get(item.NextSymbol.Name)
-                        self._register(self.goto, (idx, item.NextSymbol), next_state.idx)
-                else:
-                    if item.production.Left == G.startSymbol:
-                        self._register(self.action, (idx, G.EOF), (ShiftReduceParser.OK, None))
-                    else:
-                        for lookahead in item.lookaheads:
-                            self._register(self.action, (idx, lookahead), (ShiftReduceParser.REDUCE, item.production))
-                        
-        
-    @staticmethod
-    def _register(table, key, value):
-        assert key not in table or table[key] == value, 'Shift-Reduce or Reduce-Reduce conflict!!!'
-        table[key] = value
+        automaton = build_LR1_automaton(G)
+
+        index = 0
+        states = {automaton: index}
+        index += 1
+
+        pending = [automaton]
+
+        while len(pending) > 0:
+            current = pending.pop()
+
+            for symbol, list_state in current.transitions.items():
+                assert len(list_state) == 1
+                state = list_state[0]
+
+                if state not in states:
+                    pending.append(state)
+                    states[state] = index
+                    index += 1
+
+                self.table[states[current], symbol] = (ShiftReduceParser.SHIFT, states[state])
+
+        for state in states.keys():
+            if state.final:
+                for item in state.state:
+                    if item.production == G.startSymbol.productions[0] and item.IsReduceItem:
+                        self.table[states[state], G.EOF.Name] = (ShiftReduceParser.OK, None)
+
+        for state in states.keys():
+            if state.final:
+                for item in state.state:
+                    if item.IsReduceItem:
+                        if item.production != G.startSymbol.productions[0]:
+                            for terminal in item.lookaheads:
+                                if (states[state], terminal.Name) not in self.table:
+                                    self.table[states[state], terminal.Name] = (
+                                        ShiftReduceParser.REDUCE, item.production)
+                                else:
+                                    error("PARSER ERROR", "Grammar not LR(1), shit reduce or reduce reduce error",f"At {states[state], terminal.Name}: table[{states[state]},{terminal.Name}] = {self.table[states[state], terminal.Name]} and tried to set it to {ShiftReduceParser.REDUCE, item.production}")
+                                 
+

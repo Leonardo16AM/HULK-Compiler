@@ -293,6 +293,47 @@ def build_LR1_automaton(G):
  r.set_formatter(multiline_formatter)
  return r
 
+def build_LR1_automaton(grammar):
+    assert len(grammar.startSymbol.productions) == 1, 'La gramática debe estar aumentada'
+    firsts_sets = compute_firsts(grammar)
+    firsts_sets[grammar.EOF] = ContainerSet(grammar.EOF)
+    
+    initial_production = grammar.startSymbol.productions[0]
+    initial_item = Item(initial_production, 0, lookaheads=(grammar.EOF,))
+    initial_set = frozenset([initial_item])
+    
+    initial_closure = closure_lr1(initial_set, firsts_sets)
+    initial_state = State(frozenset(initial_closure), True)
+    
+    unmarked_states = [initial_set]
+    state_map = {initial_set: initial_state}
+    
+    from termcolor import colored
+    while unmarked_states:
+        print(colored(len(unmarked_states), 'magenta'))
+        print("===================")
+        
+        current_set = unmarked_states.pop()
+        current_state = state_map[current_set]
+        
+        for symbol in grammar.terminals + grammar.nonTerminals:
+            current_closure = closure_lr1(current_set, firsts_sets)
+            goto_set = goto_lr1(current_closure, symbol, just_kernel=True)
+            if not goto_set:
+                continue
+            
+            try:
+                next_state = state_map[goto_set]
+            except KeyError:
+                next_closure = closure_lr1(goto_set, firsts_sets)
+                next_state = state_map[goto_set] = State(frozenset(next_closure), True)
+                unmarked_states.append(goto_set)
+            
+            current_state.add_transition(symbol.Name, next_state)
+    
+    initial_state.set_formatter(multiline_formatter)
+    return initial_state
+
 # region LR1Parser
 class LR1Parser(ShiftReduceParser):
  def _build_parsing_table(W):
@@ -334,3 +375,45 @@ class LR1Parser(ShiftReduceParser):
  def _register(F,K,N):
   assert K not in F or F[K]==N,'Shift-Reduce or Reduce-Reduce conflict!!!'
   F[K]=N
+
+
+# class LR1Parser(ShiftReduceParser):
+#     def _build_parsing_table(parser_instance):
+#         augmented_grammar = parser_instance.G.AugmentedGrammar(True)
+
+#         from termcolor import colored
+#         if parser_instance.verbose:
+#             print(colored(f'Grammar: {augmented_grammar}', 'cyan'))
+        
+#         automaton = build_LR1_automaton(augmented_grammar)
+        
+#         if parser_instance.verbose:
+#             print(colored(f'States: {automaton}', 'yellow'))
+#         # automaton.plot()
+
+#         for state_index, state in enumerate(automaton):
+#             if parser_instance.verbose:
+#                 print(state_index, '\t', '\n\t '.join(str(item) for item in state.state), '\n')
+#             state.idx = state_index
+        
+#         for state in automaton:
+#             if parser_instance.verbose:
+#                 print(colored(f'{state}', 'cyan'))
+#                 print('========================')
+            
+#             state_id = state.idx
+#             for item in state.state:
+#                 if item.IsReduceItem:
+#                     production = item.production
+#                     if production.Left == augmented_grammar.startSymbol:
+#                         parser_instance._register(parser_instance.action, (state_id, augmented_grammar.EOF), (parser_instance.OK, None))
+#                     else:
+#                         for lookahead in item.lookaheads:
+#                             parser_instance._register(parser_instance.action, (state_id, lookahead), (parser_instance.REDUCE, production))
+#                 else:
+#                     next_symbol = item.NextSymbol
+#                     next_state_id = state.get(next_symbol.Name).idx
+#                     if next_symbol.IsTerminal:
+#                         parser_instance._register(parser_instance.action, (state_id, next_symbol), (parser_instance.SHIFT, next_state_id))
+#                     else:
+#                         parser_instance._register(parser_instance.goto, (state_id, next_symbol), next_state_id)
