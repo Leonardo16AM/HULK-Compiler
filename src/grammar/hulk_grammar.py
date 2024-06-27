@@ -88,7 +88,7 @@ parameter_list %= id + colon + id + comma + parameter_list, lambda h, s: [variab
 type_dec %= type_t + id + lcurly + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], [], None, [], s[4])
 type_dec %= type_t + id + opar + parameters + cpar + lcurly + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], s[4], None, [], s[7])
 type_dec %= type_t + id + inherits + id + lcurly + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], [], s[4], [], s[6])
-type_dec %= type_t + id + inherits + id  + opar + args + cpar + lcurly + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], [], s[4], s[6], s[9])
+# type_dec %= type_t + id + inherits + id  + opar + args + cpar + lcurly + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], [], s[4], s[6], s[9])
 type_dec %= type_t + id + opar + parameters + cpar + inherits + id + lcurly + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], s[4], s[7], [], s[9])
 type_dec %= type_t + id + opar + parameters + cpar + inherits + id + opar + args + cpar + lcurly + feature_list + rcurly, lambda h, s: type_declaration_node(s[2], s[4], s[7], s[9], s[12])
 
