@@ -35,7 +35,7 @@ def evaluate_reverse_parse(right_parse, operations, tokens):
                     value.line = current_line
                 stack.append(value)
         else:
-            raise Exception('Invalid action!!!')
+            raise Exception(f'Invalid action!!! {operation}')
 
     assert len(stack) == 1
     assert isinstance(next(tokens).token_type, EOF)
