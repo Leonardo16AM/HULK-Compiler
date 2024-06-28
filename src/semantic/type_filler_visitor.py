@@ -28,7 +28,7 @@ class type_filler:
         params_names, params_types = self.get_params_names_and_types(node)
 
         if node.return_type is None:
-            return_type = self.context.get_type('<void>')
+            return_type = self.context.get_type('Object')
         else:
             try:
                 return_type = self.context.get_type(node.return_type)

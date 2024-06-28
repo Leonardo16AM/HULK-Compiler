@@ -34,6 +34,7 @@ class Method:
             other.return_type == self.return_type and \
             other.param_types == self.param_types
 
+#region type
 class Type:
     def __init__(self, name:str):
         self.name = name
@@ -135,16 +136,38 @@ class ErrorType(Type):
 
 class VoidType(Type):
     def __init__(self):
-        Type.__init__(self, '<void>')
+        Type.__init__(self, 'Object')
 
     def conforms_to(self, other):
-        raise Exception('Invalid type: void type.')
+        return  False
 
     def bypass(self):
         return True
 
     def __eq__(self, other):
         return isinstance(other, VoidType)
+    
+class VectorType(Type):
+    def __init__(self, element_type):
+        super().__init__('Vector')
+        self.element_type = element_type
+
+    def get_element_type(self):
+        return self.element_type
+
+    def conforms_to(self, other):
+        if isinstance(other, VectorType):
+            return self.element_type.conforms_to(other.element_type)
+        return super().conforms_to(other)
+
+    def __eq__(self, other):
+        return isinstance(other, VectorType) and self.element_type == other.element_type
+
+    def __str__(self):
+        return f'Vector of {self.element_type.name}'
+
+    def __repr__(self):
+        return str(self)
 
 class IntType(Type):
     def __init__(self):
@@ -153,6 +176,7 @@ class IntType(Type):
     def __eq__(self, other):
         return other.name == self.name or isinstance(other, IntType)
 
+#region context
 class Context:
     def __init__(self):
         self.types = {}
@@ -175,17 +199,54 @@ class Context:
     def __repr__(self):
         return str(self)
 
+    def lca(self, a: Type, b: Type) -> Type:
+            ancestors_a = set()
+            current = a
+            while current is not None:
+                ancestors_a.add(current)
+                current = current.parent
+
+            current = b
+            while current is not None:
+                if current in ancestors_a:
+                    return current
+                current = current.parent
+
+            return None
+    def lowest_common_ancestor(self, types: list[Type]) -> Type:
+        if not types:
+            raise ValueError("The types list must not be empty.")
+        
+        if len(types) == 1:
+            return types[0]
+
+        common_ancestor = types[0]
+        for typex in types[1:]:
+            common_ancestor = self.lca(common_ancestor, typex)
+            if common_ancestor is None:
+                break
+        
+        return common_ancestor
+
 class VariableInfo:
     def __init__(self, name, vtype):
         self.name = name
         self.type = vtype
 
+#region scope
 class Scope:
     def __init__(self, parent=None):
         self.locals = []
         self.parent = parent
         self.children = []
         self.index = 0 if parent is None else len(parent)
+
+    def print(self,tabs=0):
+        for l in self.locals:
+            print(tabs*"____",l.name)
+
+        for c in self.children:
+            c.print(tabs+1)
 
     def __len__(self):
         return len(self.locals)
@@ -205,7 +266,7 @@ class Scope:
         try:
             return next(x for x in locals if x.name == vname)
         except StopIteration:
-            return self.parent.find_variable(vname, self.index) if self.parent is None else None
+            return self.parent.find_variable(vname, self.index) if self.parent is not None else None
 
     def is_defined(self, vname):
         return self.find_variable(vname) is not None
