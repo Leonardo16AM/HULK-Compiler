@@ -9,11 +9,14 @@ def clean_text(text):
     text = re.sub(r'[\r\n\t]', ' ', text)
     return text
 
-def error(type, message, code="",line="", stop=True,verbose="True"):
+def error(type, message, code="",line="", stop=True,verbose=True,warn=False):
     try:
         columns, _ = os.get_terminal_size()
     except OSError:
         columns = 80  
+
+    color="red"
+    if warn: color="yellow"
 
     message = clean_text(message)
     code = clean_text(code)
@@ -46,19 +49,19 @@ def error(type, message, code="",line="", stop=True,verbose="True"):
     border_horizontal = top_left + (horizontal * (width + 2)) + top_right
     
     to_print=''
-    to_print+=colored(border_horizontal, 'red')+'\n'
+    to_print+=colored(border_horizontal, color)+'\n'
 
     for detail in details:
         clean_detail = clean_text(detail)
         if len(clean_detail) > width:
             detail = detail[:width - 3] + '...'
 
-        to_print+=colored(vertical + ' ', 'red')
+        to_print+=colored(vertical + ' ', color)
         to_print+=detail.ljust(width + len(detail) - len(clean_detail))
-        to_print+=colored(' ' + vertical, 'red')+'\n'
+        to_print+=colored(' ' + vertical, color)+'\n'
 
     border_horizontal = bottom_left + (horizontal * (width + 2)) + bottom_right
-    to_print+=colored(border_horizontal, 'red')
+    to_print+=colored(border_horizontal, color)
 
     if verbose:
         print(to_print)

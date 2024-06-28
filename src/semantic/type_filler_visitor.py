@@ -28,7 +28,7 @@ class type_filler:
         params_names, params_types = self.get_params_names_and_types(node)
 
         if node.return_type is None:
-            return_type = self.context.get_type('<void>')
+            return_type = self.context.get_type('Object')
         else:
             try:
                 return_type = self.context.get_type(node.return_type)
@@ -36,11 +36,18 @@ class type_filler:
                 self.errors.append(error("SEMANTIC ERROR",str(e),line=node.line,verbose=False))
                 return_type = ErrorType()
 
-        try:
-            function_type = self.context.get_type('Function')
-            function_type.define_method(node.id, params_names, params_types, return_type)
-        except SemanticError as e:
-            self.errors.append(error("SEMANTIC ERROR",str(e),line=node.line,verbose=False))
+        
+        if self.current_type==None:
+            try:
+                function_type = self.context.get_type('Function')
+                function_type.define_method(node.id, params_names, params_types, return_type)
+            except SemanticError as e:
+                self.errors.append(error("SEMANTIC ERROR",str(e),line=node.line,verbose=False))
+        else:
+            try:
+                self.current_type.define_method(node.id, params_names, params_types, return_type)
+            except SemanticError as e:
+                self.errors.append(error("SEMANTIC ERROR",str(e),line=node.line,verbose=False))
 
     def get_params_names_and_types(self, node):
         if not hasattr(node, 'params') or node.params is None:
@@ -53,14 +60,15 @@ class type_filler:
             param_name = param.id
             param_type_name = param.type_id
             if param_name in params_names:
-                self.errors.append(error("SEMANTIC ERROR",f'Parameter {param_name} previously declared',line=node.line,verbose=False))
+                self.errors.append(error("SEMANTIC ERROR",f'Parameter "{param_name}" previously declared on function "{node.id}"',line=node.line,verbose=False))
                 index = params_names.index(param_name)
                 params_types[index] = ErrorType()
             else:
                 try:
                     param_type = self.context.get_type(param_type_name)
                 except SemanticError as e:
-                    self.errors.append(error("SEMANTIC ERROR",str(e),line=node.line,verbose=False))
+                    if param_type_name!=None:
+                        self.errors.append(error("SEMANTIC ERROR",str(e),line=node.line,verbose=False))
                     param_type = ErrorType()
                 params_types.append(param_type)
                 params_names.append(param_name)
@@ -80,7 +88,7 @@ class type_filler:
             return
         
         if node.parent in ['Number', 'Bool', 'String']:
-            self.errors.append(error("SEMANTIC ERROR",f'Type {node.id} is inheriting from a forbidden type',line=node.line,verbose=False))
+            self.errors.append(error("SEMANTIC ERROR",f'Type "{node.id}" is inheriting from a forbidden type',line=node.line,verbose=False))
         elif node.parent is not None:
             try:
                 parent = self.context.get_type(node.parent)
@@ -148,10 +156,12 @@ class type_filler:
         try:
             var_type = self.context.get_type(node.type_id)
         except SemanticError as e:
-            self.errors.append(error("SEMANTIC ERROR",str(e),line=node.line,verbose=False))
+            if node.type_id!=None:
+                self.errors.append(error("SEMANTIC ERROR",str(e),line=node.line,verbose=False))
             var_type = ErrorType()
 
         try:
             self.current_type.define_attribute(node.id, var_type)
         except SemanticError as e:
-            self.errors.append(error("SEMANTIC ERROR",str(e),line=node.line,verbose=False))
+            if var_type!=ErrorType():
+                self.errors.append(error("SEMANTIC ERROR",str(e),line=node.line,verbose=False))

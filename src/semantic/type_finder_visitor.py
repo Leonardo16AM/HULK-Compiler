@@ -25,7 +25,7 @@ class type_finder:
         number_type = self.context.create_type('Number')
         number_type.set_parent(object_type)
 
-        bool_type = self.context.create_type('Bool')
+        bool_type = self.context.create_type('Boolean')
         bool_type.set_parent(object_type)
 
 
@@ -61,6 +61,10 @@ class type_finder:
         rand_function = self.context.get_type('Function')
         rand_function.define_method('rand', [], [], number_type)
 
+        base_function = self.context.get_type('Function')
+        base_function.define_method('base', [], [], object_type)
+
+
         parse_function = self.context.get_type('Function')
         parse_function.define_method('parse', ['value'], [string_type], number_type)
 
@@ -69,7 +73,7 @@ class type_finder:
         iterable_protocol.define_method('current', [], [], object_type)
 
         range_type = self.context.create_type('Range')
-        range_type.set_parent(object_type)
+        range_type.set_parent(iterable_protocol)
         range_type.params_names, range_type.params_types = ['min', 'max'], [number_type, number_type]
         range_type.define_attribute('min', number_type)
         range_type.define_attribute('max', number_type)

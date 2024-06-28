@@ -4,12 +4,11 @@ from src.grammar.hulk_ast import *
 from src.utils.errors import *
 
 class var_finder:
-    def __init__(self, context, errors=None):
-        if errors is None:
-            errors = []
+    def __init__(self, context, errors=[],warnings=[]):
         self.context = context
         self.current_type = None
         self.errors = errors
+        self.warnings=warnings
 
     @visitor.on('node')
     def visit(self, node, scope):
@@ -34,8 +33,9 @@ class var_finder:
         for param in node.params:
             try:
                 function_scope.define_variable(param.id, self.context.get_type(param.type_id))
-            except SemanticError as e:
-                self.errors.append(error("SEMANTIC ERROR",str(e)+f' On function {node.id}', line=node.line, verbose=False))
+            except SemanticError as e:            
+                if param.type_id!=None:
+                    self.errors.append(error("TYPE ERROR", str(e)+f' On function "{node.id}"', line=node.line, verbose=False))
         self.visit(node.body, function_scope)
 
     @visitor.when(type_declaration_node)
@@ -60,7 +60,8 @@ class var_finder:
         try:
             var_type = self.context.get_type(node.type_id)
         except SemanticError as e:
-            self.errors.append(error("SEMANTIC ERROR", str(e)+f' On varible {node.id}', line=node.line, verbose=False))
+            if node.type_id!=None:
+               self.errors.append(error("TYPE ERROR", str(e)+f' On varible "{node.id}"', line=node.line, verbose=False))
             var_type = None
 
         scope.define_variable(node.id, var_type)
