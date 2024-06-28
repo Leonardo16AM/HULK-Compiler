@@ -5,10 +5,11 @@ from termcolor import colored
 
 def semantic_check(ast,verbose=False):
     errors=[]
+    warnings=[]
     type_collector = type_finder(errors)
     context,errors=type_collector.visit(ast)
 
-    var_collector=var_finder(context,errors)
+    var_collector=var_finder(context,errors,warnings)
     scope=var_collector.visit(ast)
     if verbose:print(colored(scope,'yellow'))
 
@@ -18,6 +19,8 @@ def semantic_check(ast,verbose=False):
 
     if verbose:print(context)
 
+    for warning in warnings:
+        print(warning)
     if errors:
         for error in errors:
             print(error)

@@ -77,6 +77,21 @@ type C inherits A {
     hello() => print("C");
 }
 
+type wacamole{
+    y = 0;
+    f() {
+        self.y:=12;
+        self := new A(); 
+    }
+    g(a,b,a) {
+        self.y:=12;
+        self := new A(); 
+    }
+    f() {
+        print("esto da error malditasea");
+    }
+}
+
 
 {
     42;
@@ -208,3 +223,4 @@ type C inherits A {
 
     let awacate: QueRico = new QueRico("siuuuu" @@ banda @ yaes + 4*5^2 @@ temporada_de_awacate == true) in aguacate.cascara("verde").lo_de_adentro(43*-1).semilla(true);
 }
+
