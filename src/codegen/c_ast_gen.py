@@ -160,7 +160,7 @@ class ast_generator:
         list=[]
         list.append(self.visit(node.left))
         l=self.cont
-        list.append(self.visit(string_node(f"{'"'}{node.middle}{'"'}")))
+        list.append(self.visit(string_node('"'+node.middle+'"')))
         m=self.cont
         list.append(self.visit(node.right))
         r=self.cont
