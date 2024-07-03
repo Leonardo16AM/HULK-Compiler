@@ -118,12 +118,12 @@ class ast_generator:
         retvar=self.cont
         args=[]
         for arg in node.params:
-            args.append(c_variable_declaration_node("Object *",arg))
+            args.append(c_variable_declaration_node("Object *",f"Var_{arg.id}"))
         type="Object *"
         self.cont+=1
         ret=c_statement_node(c_return_node(c_variable_node(f"Nod_{retvar}")))
-        body=c_expression_block_node([body,c_statement_node])
-        return function_declaration_node(fun_name,args,type,body)
+        body=c_expression_block_node([body,ret])
+        return c_function_declaration_node(fun_name,args,body,type)
 
     @visitor.when(type_declaration_node)
     def visit(self, node, espectial = None):
@@ -357,6 +357,7 @@ class ast_generator:
         r_as_number=c_function_call_node("get_number",[c_variable_node(f"Nod_{r}")])
         op_node=c_function_call_node("pow",[l_as_number,r_as_number])
         list.append(c_statement_node(c_assignment_node(c_variable_node(f"Nod_{self.cont}"),c_function_call_node("number_object",[op_node]))))
+        return c_expression_block_node(list)
 
 
 
@@ -437,7 +438,7 @@ class ast_generator:
         tam=len(conditions)
         lastblock=c_expression_block_node([results[tam-1][1],c_statement_node(c_assignment_node(c_variable_node(f"Nod_{self.cont}"),c_variable_node(f"Nod_{results[tam-1][0]}")))])
         for i in reversed(range(tam-1)):
-            condition1=c_function_call_node("get_int",[c_variable_node(f"Nod_{conditions[i][0]}")])
+            condition1=c_function_call_node("get_bool",[c_variable_node(f"Nod_{conditions[i][0]}")])
             body1=c_expression_block_node([results[i][1],c_statement_node(c_assignment_node(c_variable_node(f"Nod_{self.cont}"),c_variable_node(f"Nod_{results[i][0]}")))])
             lastblock=c_expression_block_node([conditions[i][1],c_if_else_node(condition1,body1,lastblock)])
         list.append(lastblock)

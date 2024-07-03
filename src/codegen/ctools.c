@@ -274,7 +274,22 @@ Object *concatenate(Object* a,Object* b){
     return string_object(ans);
 }
 
-
+int equals(Object *a,Object *b){
+    if(a->real_type != b->real_type)return 0;
+    if(a->rvalue != b->rvalue)return 0;
+    if(a->value != b->value)return 0;
+    if(!strcmp(a->string_value,b->string_value))return 0;
+    Node* cura=a->attributes.head;
+    Node* curb=b->attributes.head;
+    while(1){
+        if(cura==NULL && curb==NULL)break;
+        if(cura==NULL || curb==NULL)return 0;
+        if(!equals(cura->value,curb->value))return 0;
+        cura=cura->next;
+        curb=curb->next;
+    }
+    return 1;
+}
 
 
 Object* function_print(Object *a){
