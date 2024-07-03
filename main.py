@@ -9,7 +9,7 @@ from src.parser.LR1_parser import LR1Parser
 from src.cmp.evaluation import evaluate_reverse_parse
 from src.semantic.ast_printer_visitor import *
 from src.semantic.semantic_check import semantic_check
-
+from src.codegen.codegen import codegen
     
 def pipeline(file_path="examples/custom_test.hulk",verbose=True):
     
@@ -57,6 +57,10 @@ def pipeline(file_path="examples/custom_test.hulk",verbose=True):
     if verbose:print(colored("========================================CHECKING_SEMATICS========================================",'blue'))
     semantic_check(ast)
     if verbose:print(colored("========================================GERNERATING_CODE=========================================",'blue'))
+    code=codegen(ast)
+    code.save("compiled/code.c")
+    code.compile_and_run("compiled/code.c")
+
     if verbose:print(colored("============================================FINISHED=============================================",'blue'))
 
 
