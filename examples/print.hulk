@@ -7,6 +7,18 @@ protocol Equatable extends Hashable {
     hash():Number;
 }
 
+type Person(firstname, lastname) {
+    firstnam = firstname;
+    lastnam = lastname;
+
+    name() => self.firstnam @@ self.lastname;
+    hash() : Number {
+        self.obi:="wan";
+        self.lastnam:=self.manolo;
+        5;
+    }
+}
+
 let a = 0 in {
     a := 2;
     print(a**4);

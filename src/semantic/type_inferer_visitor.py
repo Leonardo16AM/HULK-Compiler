@@ -19,26 +19,29 @@ class type_inferer:
         self.current_type = None
         self.errors = errors
         self.warnings = warnings
-        self.object_type=self.context.get_type("Object")
+        self.OBJECT_TYPE=self.context.get_type("Object")
 
     @visitor.on('node')
     def visit(self, node, scope):
         pass
 
+    #region program
     @visitor.when(program_node)
     def visit(self, node, scope=Scope()):
         for declaration in node.dec_list:
             self.visit(declaration, scope)
         self.visit(node.global_expr, scope)
         return self.context,self.errors,self.warnings
+    
 
+
+    #region type_declaration
     @visitor.when(type_declaration_node)
     def visit(self, node, scope):
         if node.id.startswith('<error>'):return
 
         scope=scope.create_child()
         self.current_type = self.context.get_type(node.id)
-
 
         if len(node.params)==0 and node.parent!=None:
             node.params=self.context.get_type(node.parent).attributes
@@ -47,8 +50,8 @@ class type_inferer:
                     self.current_type.define_attribute(param, self.context.get_type(param))
                     scope.define_variable(param, self.context.get_type(param))
                 except SemanticError as e:
-                    self.current_type.define_attribute(param, self.object_type)
-                    scope.define_variable(param, self.object_type)
+                    self.current_type.define_attribute(param, self.OBJECT_TYPE)
+                    scope.define_variable(param, self.OBJECT_TYPE)
         else:
             for param in node.params:
                 add=True
@@ -57,22 +60,22 @@ class type_inferer:
                     if add:self.current_type.define_attribute(param, self.context.get_type(param))
                     scope.define_variable(param.id, self.context.get_type(param.id))
                 except SemanticError as e:
-                    if add:self.current_type.define_attribute(param.id, self.object_type)
+                    if add:self.current_type.define_attribute(param.id, self.OBJECT_TYPE)
                     try:
-                        scope.define_variable(param.id, self.object_type)
+                        scope.define_variable(param.id, self.OBJECT_TYPE)
                     except Exception as e: pass
         
         if self.current_type.parent:
             parent_type = self.current_type.parent
             if type(parent_type) == ErrorType():
-                self.errors.append(error("SEMANTIC ERROR", f'Invalid parent type for "{node.id}"', line=node.line, verbose=False))
+                self.errors.append(error("SEMANTIC ERROR", f'Invalid parent type for "{node.id}"',
+                                          line=node.line, verbose=False))
             
         for feature in node.features:
             self.visit(feature, scope)
-
         self.current_type = None
 
-
+    #region protocol_declaration
     @visitor.when(protocol_declaration_node)
     def visit(self, node, scope):
         if node.id.startswith('<error>'):return
@@ -83,22 +86,18 @@ class type_inferer:
         if self.current_type.parent:
             parent_type = self.current_type.parent
             if type(parent_type) == ErrorType():
-                self.errors.append(error("SEMANTIC ERROR", f'Invalid parent type for protocol "{node.id}"', line=node.line, verbose=False))
+                self.errors.append(error("SEMANTIC ERROR", f'Invalid parent type for protocol "{node.id}"',
+                                          line=node.line, verbose=False))
             
         for fun in node.functions:
-            try:
-                # self.current_type.define_method(fun.id,[],[],self.context.get_type(fun.return_type))
-                self.visit(fun, scope)
-            except SemanticError as e:
-                # self.errors.append(error("SEMANTIC ERROR", str(e), line=node.line, verbose=False))
-                pass
-
+            self.visit(fun, scope)
         self.current_type = None
 
+    #region function_declaration
     @visitor.when(function_declaration_node)
     def visit(self, node, scope):
         if node.id.startswith('<error>'):
-            return
+            return self.OBJECT_TYPE
         
         if self.current_type!=None:
             method = self.current_type.get_method(node.id)
@@ -113,7 +112,7 @@ class type_inferer:
                 scope.define_variable(param.id, param_type)
 
         return_type = self.visit(node.body, scope)
-        if node.body and  not return_type.conforms_to(method.return_type) and method.return_type!=self.object_type:
+        if node.body and  not return_type.conforms_to(method.return_type) and method.return_type!=self.OBJECT_TYPE:
             self.errors.append(error("SEMANTIC ERROR", 'Incompatible return type', line=node.line, verbose=False))
 
     def prototipes(self,clas,prot):
@@ -121,13 +120,14 @@ class type_inferer:
         if not  all(att in prot.attributes for att in clas.attributes): return False
         return True
 
+    #region variable_declaration
     @visitor.when(variable_declaration_node)
     def visit(self, node, scope):
         
         if node.id.startswith('<error>'):return
 
         if node.id=="self":
-            return self.object_type
+            return self.OBJECT_TYPE
 
         if node.type_id!=None:
             try:
@@ -135,7 +135,7 @@ class type_inferer:
             except SemanticError as e:
                 var_type=ErrorType()
         else: 
-            var_type=self.object_type
+            var_type=self.OBJECT_TYPE
         expr_type = self.visit(node.value, scope)
         
         if not expr_type.conforms_to(var_type) and not self.prototipes(expr_type,var_type):
@@ -143,6 +143,7 @@ class type_inferer:
         var_type=expr_type
         scope.define_variable(node.id, var_type)
 
+    #region expression_block
     @visitor.when(expression_block_node)
     def visit(self, node, scope):
         expr_type = ErrorType()
@@ -150,6 +151,9 @@ class type_inferer:
             expr_type = self.visit(expr, scope)
         return expr_type
 
+
+
+    #region function_call
     @visitor.when(function_call_node)
     def visit(self, node, scope):
         args_types = [self.visit(arg, scope) for arg in node.args]
@@ -167,11 +171,12 @@ class type_inferer:
 
         for arg_type, param_type in zip(args_types, function.param_types):
             if not arg_type.conforms_to(param_type):
-                self.errors.append(error("SEMANTIC ERROR", f'Incompatible argument type {arg_type.name} for parameter type {param_type.name}', line=node.line, verbose=False))
+                self.errors.append(error("SEMANTIC ERROR", f'Incompatible argument type "{arg_type.name}" for parameter type "{param_type.name}"', line=node.line, verbose=False))
                 return ErrorType()
 
         return function.return_type
 
+    #region attribute_call
     @visitor.when(attribute_call_node)
     def visit(self, node, scope):
         obj_type = self.visit(node.expr, scope)
@@ -186,6 +191,7 @@ class type_inferer:
             self.errors.append(error("SEMANTIC ERROR", str(e), line=node.line, verbose=False))
             return ErrorType()
 
+    #region if
     @visitor.when(if_node)
     def visit(self, node, scope):
         types = []
@@ -195,17 +201,18 @@ class type_inferer:
                 self.errors.append(error("SEMANTIC ERROR", 'Condition must be of type bool', line=condition.line, verbose=False))
             if self.visit(body, scope)!=ErrorType():
                 types.append(self.visit(body, scope))
-        if len(types)==0:return self.object_type
+        if len(types)==0:return self.OBJECT_TYPE
         return types[0] if len(types) == 1 else self.context.lowest_common_ancestor(types)
 
+    #region while
     @visitor.when(while_node)
     def visit(self, node, scope):
         cond_type = self.visit(node.condition, scope)
         if cond_type != self.context.get_type('Boolean'):
             self.errors.append(error("SEMANTIC ERROR", 'Condition must be of type bool', line=node.line, verbose=False))
-        self.visit(node.body, scope)
-        return VoidType()
+        return self.visit(node.body, scope)
 
+    #region for
     @visitor.when(for_node)
     def visit(self, node, scope):
         iterable_type = self.visit(node.expr, scope)
@@ -215,12 +222,12 @@ class type_inferer:
         try: 
             vtype=self.context.get_type(node.variable.id)
         except Exception as e:
-            vtype=self.object_type
+            vtype=self.OBJECT_TYPE
             
         scope.define_variable(node.variable.id, vtype )
-        self.visit(node.body, scope)
-        return VoidType()
+        return self.visit(node.body, scope)
 
+    #region let
     @visitor.when(let_node)
     def visit(self, node, scope):
         scope = scope.create_child()
@@ -228,6 +235,7 @@ class type_inferer:
             self.visit(declaration, scope)
         return self.visit(node.body, scope)
 
+    #region new
     @visitor.when(new_node)
     def visit(self, node, scope):
         try:
@@ -244,19 +252,20 @@ class type_inferer:
             try:
                 param_type=self.context.get_type(attr.name)
                 if not arg_type.conforms_to(param_type):
-                    self.errors.append(error("SEMANTIC ERROR", f'Incompatible argument type {arg_type.name} for parameter type {param_type.name} while calling "{node.type_id}"', line=node.line, verbose=False))
+                    self.errors.append(error("SEMANTIC ERROR", f'Incompatible argument type "{arg_type.name}" for parameter type "{param_type.name}" while calling "{node.type_id}"', line=node.line, verbose=False))
                     return ErrorType()
             except Exception as e:
                 return ErrorType()    
         return ttype
 
+    #region variable
     @visitor.when(variable_node)
     def visit(self, node, scope):
         if node.id=="self":
-            return self.object_type
+            return self.current_type
         var = scope.find_variable(node.id)
         if var is None:
-            self.errors.append(error("SEMANTIC ERROR", f'Variable {node.id} not defined', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'Variable "{node.id}" not defined', line=node.line, verbose=False))
             return ErrorType()
         
         return var.type
@@ -283,7 +292,7 @@ class type_inferer:
         right_type = self.visit(node.right, scope)
         accepted=[self.context.get_type('Number'),self.context.get_type('Object')]
         if left_type not in accepted or right_type not in accepted:
-            self.errors.append(error("SEMANTIC ERROR", f'lInvalid operation between {left_type.name} and {right_type.name}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'lInvalid operation between "{left_type.name}" and "{right_type.name}"', line=node.line, verbose=False))
             return ErrorType()
 
         return self.context.get_type('Number')
@@ -295,7 +304,7 @@ class type_inferer:
 
         accepted=[self.context.get_type('Number'),self.context.get_type('Object')]
         if left_type not in accepted or right_type not in accepted:
-            self.errors.append(error("SEMANTIC ERROR", f'miInvalid operation between {left_type.name} and {right_type.name}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'miInvalid operation between "{left_type.name}" and "{right_type.name}"', line=node.line, verbose=False))
             return ErrorType()
 
         return self.context.get_type('Number')
@@ -307,7 +316,7 @@ class type_inferer:
 
         accepted=[self.context.get_type('Number'),self.context.get_type('Object')]
         if left_type not in accepted or right_type not in accepted:
-            self.errors.append(error("SEMANTIC ERROR", f'mInvalid operation between {left_type.name} and {right_type.name}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'mInvalid operation between "{left_type.name}" and "{right_type.name}"', line=node.line, verbose=False))
             return ErrorType()
 
         return self.context.get_type('Number')
@@ -319,7 +328,7 @@ class type_inferer:
         
         accepted=[self.context.get_type('Number'),self.context.get_type('Object')]
         if left_type not in accepted or right_type not in accepted:
-            self.errors.append(error("SEMANTIC ERROR", f'DInvalid operation between {left_type.name} and {right_type.name}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'DInvalid operation between "{left_type.name}" and "{right_type.name}"', line=node.line, verbose=False))
             return ErrorType()
 
         return self.context.get_type('Number')
@@ -331,7 +340,7 @@ class type_inferer:
 
         accepted=[self.context.get_type('Number'),self.context.get_type('Object')]
         if left_type not in accepted or right_type not in accepted:
-            self.errors.append(error("SEMANTIC ERROR", f'Invalid operation between {left_type.name} and {right_type.name}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'Invalid operation between "{left_type.name}" and "{right_type.name}"', line=node.line, verbose=False))
             return ErrorType()
 
         return self.context.get_type('Number')
@@ -343,7 +352,7 @@ class type_inferer:
 
         accepted=[self.context.get_type('Number'),self.context.get_type('Object')]
         if left_type not in accepted or right_type not in accepted:
-            self.errors.append(error("SEMANTIC ERROR", f'Invalid operation between {left_type.name} and {right_type.name}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'Invalid operation between "{left_type.name}" and "{right_type.name}"', line=node.line, verbose=False))
             return ErrorType()
 
         return self.context.get_type('Number')
@@ -356,7 +365,7 @@ class type_inferer:
 
         accepted=[self.context.get_type('Number'),self.context.get_type('Object')]
         if left_type not in accepted or right_type not in accepted:
-            self.errors.append(error("SEMANTIC ERROR", f'Invalid comparison between {left_type.name} and {right_type.name}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'Invalid comparison between "{left_type.name}" and "{right_type.name}"', line=node.line, verbose=False))
             return ErrorType()
 
         return self.context.get_type('Boolean')
@@ -368,7 +377,7 @@ class type_inferer:
 
         accepted=[self.context.get_type('Number'),self.context.get_type('Object')]
         if left_type not in accepted or right_type not in accepted:
-            self.errors.append(error("SEMANTIC ERROR", f'Invalid comparison between {left_type.name} and {right_type.name}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'Invalid comparison between "{left_type.name}" and "{right_type.name}"', line=node.line, verbose=False))
             return ErrorType()
 
         return self.context.get_type('Boolean')
@@ -380,7 +389,7 @@ class type_inferer:
 
         accepted=[self.context.get_type('Number'),self.context.get_type('Object')]
         if left_type not in accepted or right_type not in accepted:
-            self.errors.append(error("SEMANTIC ERROR", f'Invalid comparison between {left_type.name} and {right_type.name}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'Invalid comparison between "{left_type.name}" and "{right_type.name}"', line=node.line, verbose=False))
             return ErrorType()
 
         return self.context.get_type('Boolean')
@@ -392,7 +401,7 @@ class type_inferer:
 
         accepted=[self.context.get_type('Number'),self.context.get_type('Object')]
         if left_type not in accepted or right_type not in accepted:
-            self.errors.append(error("SEMANTIC ERROR", f'Invalid comparison between {left_type.name} and {right_type.name}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'Invalid comparison between "{left_type.name}" and "{right_type.name}"', line=node.line, verbose=False))
             return ErrorType()
 
         return self.context.get_type('Boolean')
@@ -404,7 +413,7 @@ class type_inferer:
 
         accepted=[self.context.get_type('Number'),self.context.get_type('Object')]
         if left_type not in accepted or right_type not in accepted:
-            self.errors.append(error("SEMANTIC ERROR", f'Invalid comparison between {left_type.name} and {right_type.name}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'Invalid comparison between "{left_type.name}" and "{right_type.name}"', line=node.line, verbose=False))
             return ErrorType()
 
         return self.context.get_type('Boolean')
@@ -416,20 +425,20 @@ class type_inferer:
 
         accepted=[self.context.get_type('Number'),self.context.get_type('Object')]
         if left_type not in accepted or right_type not in accepted:
-            self.errors.append(error("SEMANTIC ERROR", f'Invalid comparison between {left_type.name} and {right_type.name}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'Invalid comparison between "{left_type.name}" and "{right_type.name}"', line=node.line, verbose=False))
             return ErrorType()
 
         return self.context.get_type('Boolean')
 
 
-
+    #region boolean_ops
     @visitor.when(and_node)
     def visit(self, node, scope):
         left_type = self.visit(node.left, scope)
         right_type = self.visit(node.right, scope)
 
         if left_type != self.context.get_type('Boolean') or right_type != self.context.get_type('Boolean'):
-            self.errors.append(error("SEMANTIC ERROR", f'Invalid logical operation between {left_type.name} and {right_type.name}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'Invalid logical operation between "{left_type.name}" and "{right_type.name}"', line=node.line, verbose=False))
             return ErrorType()
 
         return self.context.get_type('Boolean')
@@ -440,7 +449,7 @@ class type_inferer:
         right_type = self.visit(node.right, scope)
 
         if left_type != self.context.get_type('Boolean') or right_type != self.context.get_type('Boolean'):
-            self.errors.append(error("SEMANTIC ERROR", f'Invalid logical operation between {left_type.name} and {right_type.name}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'Invalid logical operation between "{left_type.name}" and "{right_type.name}"', line=node.line, verbose=False))
             return ErrorType()
 
         return self.context.get_type('Boolean')
@@ -456,6 +465,7 @@ class type_inferer:
 
         return self.context.get_type('Boolean')
 
+    #region as
     @visitor.when(as_node)
     def visit(self, node, scope):
         expr_type = self.visit(node.expr, scope)
@@ -467,25 +477,29 @@ class type_inferer:
 
         return cast_type
 
+    #region is
     @visitor.when(is_node)
     def visit(self, node, scope):
         self.visit(node.expr, scope)
         return self.context.get_type('Boolean')
+    
 
+    #region index
     @visitor.when(index_node)
     def visit(self, node, scope):
         index_type = self.visit(node.index, scope)
         if index_type != self.context.get_type('Number'):
-            self.errors.append(error("SEMANTIC ERROR", f'Index must be of type int, not {index_type.name}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'Index must be of type int, not "{index_type.name}"', line=node.line, verbose=False))
             return ErrorType()
 
         obj_type = self.visit(node.expr, scope)
         if not isinstance(obj_type, VectorType):
-            self.errors.append(error("SEMANTIC ERROR", f'Cannot index into non-vector type {obj_type.name}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'Cannot index into non-vector type "{obj_type.name}"', line=node.line, verbose=False))
             return ErrorType()
 
         return obj_type.get_element_type()
 
+    #region vector
     @visitor.when(vector_node)
     def visit(self, node, scope):
         elements_types = [self.visit(element, scope) for element in node.elements]
@@ -495,12 +509,13 @@ class type_inferer:
         vtype=VectorType(lca)
         return vtype
 
+    #region vector_comprehension
     @visitor.when(vector_comprehension_node)
     def visit(self, node, scope):
         iterable_type = self.visit(node.vector, scope)
         iterable_protocol = self.context.get_type('Iterable')
         if not iterable_type.conforms_to(iterable_protocol):
-            self.errors.append(error("SEMANTIC ERROR", f'{iterable_type.name} does not conform to Iterable protocol', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'"{iterable_type.name}" does not conform to Iterable protocol', line=node.line, verbose=False))
             return ErrorType()
 
         scope = scope.create_child()
@@ -512,21 +527,22 @@ class type_inferer:
 
         return VectorType(return_type)
 
+    #region concatenation_node
     @visitor.when(concatenation_node)
     def visit(self, node, scope):
         left_type = self.visit(node.left, scope)
         middle_type = self.visit(node.middle, scope)
         right_type = self.visit(node.right, scope)
 
-        concatenable=[self.context.get_type('String'),self.context.get_type('Number')]
+        concatenable=[self.context.get_type('String'),self.context.get_type('Number'),self.context.get_type('Object')]
         if left_type not in  concatenable or right_type not in concatenable:
             
-            self.errors.append(error("SEMANTIC ERROR", f'Invalid concatenation between types {left_type.name} and {right_type.name}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'Invalid concatenation between types "{left_type.name}" and "{right_type.name}"', line=node.line, verbose=False))
             return ErrorType()
 
         return self.context.get_type('String')
 
-
+    #region property_call
     @visitor.when(property_call_node)
     def visit(self, node, scope):
         obj_type = self.visit(node.expr, scope)
@@ -541,6 +557,7 @@ class type_inferer:
             self.errors.append(error("SEMANTIC ERROR", str(e), line=node.line, verbose=False))
             return ErrorType()
 
+    #region assignment_node
     @visitor.when(assignment_node)
     def visit(self, node, scope):
         var_info = scope.find_variable(node.var.id)
@@ -555,15 +572,18 @@ class type_inferer:
 
         return var_info.type
 
+    #region attribute_call
     @visitor.when(attribute_call_node)
     def visit(self, node, scope):
         obj_type = self.visit(node.expr, scope)
 
-        if obj_type == ErrorType():
-            return ErrorType()
+        if obj_type=="<self>":
+            obj_type=self.current_type
+        print(node.id,obj_type)
 
         try:
             attr = obj_type.get_attribute(node.id)
+            print(attr,'>>',attr.type)
             return attr.type
         except SemanticError as e:
             self.errors.append(error("SEMANTIC ERROR", str(e), line=node.line, verbose=False))

@@ -109,8 +109,4 @@ def hulk_tokens():
         (TokenType.SPACES, "  *"), (TokenType.ESCAPED_CHAR, "\n|\t")
     ]
 
-    hulk_lexer_synchronizing_tokens = [
-        (TokenType.SPACES, "  *"), (TokenType.ESCAPED_CHAR, "\n|\t")
-    ] + operators
-
     return hulk_tokens

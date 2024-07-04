@@ -9,6 +9,7 @@ class var_finder:
         self.current_type = None
         self.errors = errors
         self.warnings=warnings
+        self.current_type=None
 
     @visitor.on('node')
     def visit(self, node, scope):
@@ -21,7 +22,6 @@ class var_finder:
 
         for declaration in node.dec_list:
             self.visit(declaration, scope.create_child())
-
         self.visit(node.global_expr, scope.create_child())
         return scope
 
@@ -42,17 +42,21 @@ class var_finder:
     def visit(self, node: type_declaration_node, scope: Scope):
         node.scope = scope
         type_scope = scope.create_child()
+        self.current_type = self.context.get_type(node.id)
 
         for feature in node.features:
             self.visit(feature, type_scope)
+        self.current_type=None
 
     @visitor.when(protocol_declaration_node)
     def visit(self, node: protocol_declaration_node, scope: Scope):
         node.scope = scope
         protocol_scope = scope.create_child()
+        self.current_type = self.context.get_type(node.id)
 
         for func in node.functions:
             self.visit(func, protocol_scope)
+        self.current_type=None
 
     @visitor.when(variable_declaration_node)
     def visit(self, node: variable_declaration_node, scope: Scope):
@@ -62,7 +66,14 @@ class var_finder:
         except SemanticError as e:
             if node.type_id!=None:
                self.errors.append(error("TYPE ERROR", str(e)+f' On varible "{node.id}"', line=node.line, verbose=False))
-            var_type = None
+            var_type = self.context.get_type('Object')
+        
+        # if self.current_type!=None:
+        #     print(node.id,self.current_type,var_type )
+        #     try:
+        #         self.current_type.define_variable(node.id, var_type)
+        #     except SemanticError as e:
+        #        self.errors.append(error("TYPE ERROR", str(e), line=node.line, verbose=False))
 
         scope.define_variable(node.id, var_type)
         self.visit(node.value, scope.create_child())

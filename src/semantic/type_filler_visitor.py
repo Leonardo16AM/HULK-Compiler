@@ -68,7 +68,7 @@ class type_filler:
                 except SemanticError as e:
                     if param_type_name!=None:
                         self.errors.append(error("SEMANTIC ERROR",str(e),line=node.line,verbose=False))
-                    param_type = ErrorType()
+                    param_type = self.context.get_type('Object')
                 params_types.append(param_type)
                 params_names.append(param_name)
 
@@ -166,8 +166,9 @@ class type_filler:
         except SemanticError as e:
             if node.type_id!=None:
                 self.errors.append(error("SEMANTIC ERROR",str(e),line=node.line,verbose=False))
-            var_type = ErrorType()
+            var_type = self.context.get_type('Object')
 
+        print(node.id,var_type)
         try:
             self.current_type.define_attribute(node.id, var_type)
         except SemanticError as e:
