@@ -86,8 +86,12 @@ class type_inferer:
                 self.errors.append(error("SEMANTIC ERROR", f'Invalid parent type for protocol "{node.id}"', line=node.line, verbose=False))
             
         for fun in node.functions:
-            self.current_type.define_method(fun.id,[],[],self.context.get_type(fun.return_type))
-            self.visit(fun, scope)
+            try:
+                # self.current_type.define_method(fun.id,[],[],self.context.get_type(fun.return_type))
+                self.visit(fun, scope)
+            except SemanticError as e:
+                # self.errors.append(error("SEMANTIC ERROR", str(e), line=node.line, verbose=False))
+                pass
 
         self.current_type = None
 

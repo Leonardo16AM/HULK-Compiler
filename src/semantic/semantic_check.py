@@ -15,16 +15,17 @@ def semantic_check(ast,verbose=False):
     type_fill = type_filler(context, errors)
     context,errors=type_fill.visit(ast)
 
+
     if verbose:errors.append("VAR COLLECTION")
     var_collector=var_finder(context,errors,warnings)
     scope=var_collector.visit(ast)
+    
     
     scope.define_variable("PI",context.get_type("Number"))
     scope.define_variable("E",context.get_type("Number"))
 
     if verbose:print(colored(scope,'yellow'))
     
-    print("_______________________________________________________________________________________")
     if verbose:errors.append("TYPE CHECKING")
     type_inf=type_inferer(context,errors,warnings)
     context,errors,warnings=type_inf.visit(ast,scope)

@@ -1,14 +1,13 @@
-function operate(x, y) {
-    print((x + y)@"\n");
-    print((x - y)@"\n");
-    print((x * y)@"\n");
-    print((x / y)@"\n");
+protocol Hashable {
+    hash(): Number;
+}
+
+protocol Equatable extends Hashable {
+    equals(other: Object): Boolean;
+    hash():Number;
 }
 
 let a = 0 in {
-    print("Jorge"@@"Pichardo");
-    print("\n");
-    operate(10,2);
     a := 2;
     print(a**4);
 };

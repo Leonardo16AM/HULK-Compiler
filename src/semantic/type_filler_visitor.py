@@ -26,7 +26,6 @@ class type_filler:
     @visitor.when(function_declaration_node)
     def visit(self, node: function_declaration_node):
         params_names, params_types = self.get_params_names_and_types(node)
-
         if node.return_type is None:
             return_type = self.context.get_type('Object')
         else:
@@ -87,7 +86,7 @@ class type_filler:
             self.current_type = ErrorType()
             return
         
-        if node.parent in ['Number', 'Bool', 'String']:
+        if node.parent in ['Number', 'Boolean', 'String']:
             self.errors.append(error("SEMANTIC ERROR",f'Type "{node.id}" is inheriting from a forbidden type',line=node.line,verbose=False))
         elif node.parent is not None:
             try:
@@ -112,19 +111,19 @@ class type_filler:
 
         for feature in node.features:
             self.visit(feature)
+        self.current_type=None
 
     @visitor.when(protocol_declaration_node)
     def visit(self, node: protocol_declaration_node):
         if node.id.startswith('<error>'):
             return
         
+
         try:
             self.current_type = self.context.get_type(node.id)
         except SemanticError as e:
             self.errors.append(error("SEMANTIC ERROR",str(e),line=node.line,verbose=False))
             self.current_type = ErrorType()
-
-        if self.current_type == ErrorType():
             return
 
         if node.parent is not None:
@@ -140,14 +139,23 @@ class type_filler:
             except SemanticError as e:
                 self.errors.append(error("SEMANTIC ERROR",str(e),line=node.line,verbose=False))
                 parent = ErrorType()
+
             try:
                 self.current_type.set_parent(parent)
+                for method in parent.all_methods():
+                    self.current_type.define_method(method[0].name,method[0].param_names,method[0].param_types,
+                                                    method[0].return_type)
             except SemanticError as e:
                 self.errors.append(error("SEMANTIC ERROR",str(e),line=node.line,verbose=False))
 
-        for method in node.functions:
-            self.visit(method)
 
+        for method in node.functions:
+            try:
+                self.visit(method)
+            except SemanticError as e:
+                self.errors.append(error("SEMANTIC ERROR", str(e), line=node.line, verbose=False))
+        self.current_type=None
+            
     @visitor.when(variable_declaration_node)
     def visit(self, node: variable_declaration_node):
         if node.id.startswith('<error>'):
