@@ -116,8 +116,7 @@ class type_inferer:
             self.errors.append(error("SEMANTIC ERROR", 'Incompatible return type', line=node.line, verbose=False))
 
     def prototipes(self,clas,prot):
-        if not  all(method in prot.methods for method in clas.methods): return False
-        if not  all(att in prot.attributes for att in clas.attributes): return False
+        if not  all(method.name in [me.name for me in clas.methods] for method in prot.methods): return False
         return True
 
     #region variable_declaration
@@ -137,8 +136,7 @@ class type_inferer:
         else: 
             var_type=self.OBJECT_TYPE
         expr_type = self.visit(node.value, scope)
-        
-        if not expr_type.conforms_to(var_type) and not self.prototipes(expr_type,var_type):
+        if not expr_type.conforms_to(var_type) and not self.prototipes(expr_type,var_type) and var_type!=self.OBJECT_TYPE and expr_type!=self.OBJECT_TYPE:
             self.errors.append(error("SEMANTIC ERROR", f'Incompatible variable type, variable "{node.id}" with type "{expr_type.name}"', line=node.line, verbose=False))
         var_type=expr_type
         scope.define_variable(node.id, var_type)
@@ -507,6 +505,7 @@ class type_inferer:
         if type(lca) == ErrorType():
             return ErrorType()
         vtype=VectorType(lca)
+        vtype.set_parent(self.context.get_type('Iterable'))
         return vtype
 
     #region vector_comprehension
@@ -577,13 +576,8 @@ class type_inferer:
     def visit(self, node, scope):
         obj_type = self.visit(node.expr, scope)
 
-        if obj_type=="<self>":
-            obj_type=self.current_type
-        print(node.id,obj_type)
-
         try:
             attr = obj_type.get_attribute(node.id)
-            print(attr,'>>',attr.type)
             return attr.type
         except SemanticError as e:
             self.errors.append(error("SEMANTIC ERROR", str(e), line=node.line, verbose=False))

@@ -1,25 +1,14 @@
-protocol Hashable {
-    hash(): Number;
-}
-
-protocol Equatable extends Hashable {
-    equals(other: Object): Boolean;
-    hash():Number;
-}
-
-type Person(firstname, lastname) {
-    firstnam = firstname;
-    lastnam = lastname;
-
-    name() => self.firstnam @@ self.lastname;
-    hash() : Number {
-        self.obi:="wan";
-        self.lastnam:=self.manolo;
-        5;
-    }
+function operate(x, y) {
+    print((x + y)@"\n");
+    print((x - y)@"\n");
+    print((x * y)@"\n");
+    print((x / y)@"\n");
 }
 
 let a = 0 in {
+    print("Jorge"@@"Pichardo");
+    print("\n");
+    operate(10,2);
     a := 2;
     print(a**4);
 };

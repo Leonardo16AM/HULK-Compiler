@@ -168,7 +168,6 @@ class type_filler:
                 self.errors.append(error("SEMANTIC ERROR",str(e),line=node.line,verbose=False))
             var_type = self.context.get_type('Object')
 
-        print(node.id,var_type)
         try:
             self.current_type.define_attribute(node.id, var_type)
         except SemanticError as e:

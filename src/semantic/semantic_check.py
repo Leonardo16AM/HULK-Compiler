@@ -26,14 +26,12 @@ def semantic_check(ast,verbose=False):
 
     if verbose:print(colored(scope,'yellow'))
     
-    print(colored(context,'blue'))
-
     if verbose:errors.append("TYPE CHECKING")
     type_inf=type_inferer(context,errors,warnings)
     context,errors,warnings=type_inf.visit(ast,scope)
 
-    print(colored(context,'cyan'))
-
+    if verbose:print(colored(context,'cyan'))
+    
     
     for warning in warnings:
         print(warning)
