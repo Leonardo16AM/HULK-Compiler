@@ -194,8 +194,8 @@ void destroyStringSet(StringSet *set) {
 
 
 typedef struct Class{
+    char* Name;
     struct Class *Parent;
-    StringSet functions;
 } Class;
 
 
@@ -293,7 +293,7 @@ int equals(Object *a,Object *b){
 
 
 Object* function_print(Object *a){
-    printf(get_string(a));
+    printf("%s\n",get_string(a));
     return a;
 }
 

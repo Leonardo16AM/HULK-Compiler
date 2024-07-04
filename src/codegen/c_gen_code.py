@@ -179,7 +179,7 @@ class code_generator:
     
     @visitor.when(c_while_node)
     def visit(self, node):
-        return f"while({self.visit(node.conditon)}){'{'}\n {self.visit(node.body)} {'}'}\n"
+        return f"while({self.visit(node.condition)}){'{'}\n {self.visit(node.body)} {'}'}\n"
     
     @visitor.when(c_return_node)
     def visit(self, node):
@@ -188,6 +188,10 @@ class code_generator:
     @visitor.when(c_scope_node)
     def visit(self, node):
         return f"{'{'}\n {self.visit(node.expr)}{'}'}\n"
+    
+    @visitor.when(c_break_node)
+    def visit(self, node):
+        return f"break"
     
     
         

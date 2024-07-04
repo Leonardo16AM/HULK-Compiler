@@ -98,6 +98,7 @@ class ast_generator:
     def visit(self, node, espectial = None):
         self.cont=0
         list=[]
+        self.Ob_funs_dic={}
         for dec in node.dec_list:
             list.append(self.visit(dec))
         body=self.visit(node.global_expr)
@@ -113,7 +114,14 @@ class ast_generator:
         
     @visitor.when(function_declaration_node)
     def visit(self, node, espectial = None):
-        fun_name=f"function_{node.id}"
+        fun_name=""
+        if(espectial==None):
+            fun_name=f"function_{node.id}"
+        else:
+            fun_name=f"object{len(espectial)}_{espectial}_{node.id}"
+            if(len(node.params) not in self.Ob_funs_dic):
+                self.Ob_funs_dic[len(node.params)]=[]
+            self.Ob_funs_dic[len(node.params)].append((node.id,espectial))
         body=self.visit(node.body)
         retvar=self.cont
         args=[]
@@ -483,7 +491,23 @@ class ast_generator:
 
     @visitor.when(while_node)
     def visit(self, node, espectial = None):
-        condition=self.visit
+        condition=self.visit(node.condition)
+        condid=self.cont
+        body=self.visit(node.body)
+        bodid=self.cont
+        self.cont+=1
+        list=[]
+        list.append(c_statement_node(c_variable_declaration_node("Object *",f"Nod_{self.cont}")))
+        whilebody=[]
+        whilebody.append(condition)
+        ifcond=c_function_call_node("get_bool",[c_variable_node(f"Nod_{condid}")])
+        body=c_expression_block_node([body,(c_statement_node(c_assignment_node(c_variable_node(f"Nod_{self.cont}"),c_variable_node(f"Nod_{bodid}"))))])
+        elsebod=c_statement_node(c_break_node())
+        whilebody.append(c_if_else_node(ifcond,body,elsebod))
+        whilecond=c_int_node("1")
+        list.append(c_while_node(whilecond,c_expression_block_node(whilebody)))
+        return c_expression_block_node(list)
+        
 
     @visitor.when(for_node)
     def visit(self, node, espectial = None):

@@ -194,3 +194,8 @@ class c_return_node(c_expression_node):
 class c_scope_node(c_expression_node):
     def __init__(self,expr):
         self.expr = expr
+
+class c_break_node(c_expression_node):
+    def __init__(self):
+        return
+        
