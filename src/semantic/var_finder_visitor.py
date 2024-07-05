@@ -1,5 +1,5 @@
 import src.cmp.visitor as visitor
-from src.cmp.semantic import SemanticError, Context, Scope, VariableInfo
+from src.cmp.semantic import SemanticError, Context, Scope, VariableInfo, AutoType
 from src.grammar.hulk_ast import *
 from src.utils.errors import *
 
@@ -13,6 +13,7 @@ class var_finder:
 
     @visitor.on('node')
     def visit(self, node, scope):
+        node.scope=scope
         pass
 
     @visitor.when(program_node)
@@ -27,23 +28,35 @@ class var_finder:
 
     @visitor.when(function_declaration_node)
     def visit(self, node: function_declaration_node, scope: Scope):
-        node.scope = scope
-        function_scope = scope.create_child()
+        node.scope=function_scope = scope.create_child()
+        function_scope.info=node.id
         
         for param in node.params:
             try:
                 function_scope.define_variable(param.id, self.context.get_type(param.type_id))
             except SemanticError as e:            
                 if param.type_id!=None:
-                    self.errors.append(error("TYPE ERROR", str(e)+f' On function "{node.id}"', line=node.line, verbose=False))
+                    self.errors.append(error("TYPE ERROR", str(e)+f' On function "{node.id}"', 
+                                             line=node.line, verbose=False))
+                else:
+                    function_scope.define_variable(param.id, AutoType())
+
         self.visit(node.body, function_scope)
 
     @visitor.when(type_declaration_node)
     def visit(self, node: type_declaration_node, scope: Scope):
         node.scope = scope
-        type_scope = scope.create_child()
+        type_scope=node.scope.create_child()
+        node.scope.info=node.id
+        
         self.current_type = self.context.get_type(node.id)
-
+        
+        for param in node.params:
+            try:
+                node.scope.define_variable(param.id, self.context.get_type(param))
+            except SemanticError as e:
+                node.scope.define_variable(param.id, AutoType())
+        
         for feature in node.features:
             self.visit(feature, type_scope)
         self.current_type=None
@@ -51,6 +64,7 @@ class var_finder:
     @visitor.when(protocol_declaration_node)
     def visit(self, node: protocol_declaration_node, scope: Scope):
         node.scope = scope
+        scope.info=node.id
         protocol_scope = scope.create_child()
         self.current_type = self.context.get_type(node.id)
 
@@ -66,15 +80,7 @@ class var_finder:
         except SemanticError as e:
             if node.type_id!=None:
                self.errors.append(error("TYPE ERROR", str(e)+f' On varible "{node.id}"', line=node.line, verbose=False))
-            var_type = self.context.get_type('Object')
-        
-        # if self.current_type!=None:
-        #     print(node.id,self.current_type,var_type )
-        #     try:
-        #         self.current_type.define_variable(node.id, var_type)
-        #     except SemanticError as e:
-        #        self.errors.append(error("TYPE ERROR", str(e), line=node.line, verbose=False))
-
+            var_type = AutoType()
         scope.define_variable(node.id, var_type)
         self.visit(node.value, scope.create_child())
 
@@ -101,7 +107,7 @@ class var_finder:
         for_scope = scope.create_child()
         node.scope = for_scope
 
-        for_scope.define_variable(node.variable, None)
+        for_scope.define_variable(node.variable.id, AutoType())
         self.visit(node.expr, for_scope)
         self.visit(node.body, for_scope.create_child())
 
@@ -294,6 +300,6 @@ class var_finder:
     def visit(self, node: vector_comprehension_node, scope: Scope):
         node.scope = scope
         comprehension_scope = scope.create_child()
-        comprehension_scope.define_variable(node.variable, None)
+        scope.parent.define_variable(node.variable.id, AutoType())
         self.visit(node.expr, comprehension_scope)
         self.visit(node.vector, scope.create_child())

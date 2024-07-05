@@ -104,6 +104,14 @@ class Type:
 
     def bypass(self):
         return False
+    
+    def is_contravariant(self, other):
+        if other==AutoType() or self==AutoType():return True
+        return other.conforms_to(self)
+
+    def is_covariant(self, other):
+        if other==AutoType() or self==AutoType():return True
+        return self.conforms_to(other)
 
     def __str__(self):
         output = f'type {self.name}'
@@ -120,7 +128,26 @@ class Type:
 
     def __repr__(self):
         return str(self)
+    
+#region AutoType
+class AutoType(Type):
+    def __init__(self):
+        super().__init__('AutoType')
 
+    def bypass(self):
+        # Permite que AutoType se conforme a cualquier otro tipo
+        return True
+    
+    def __eq__(self, other):
+        return isinstance(other, Type) and self.name == other.name
+
+    def __str__(self):
+        return 'type AutoType {}'
+
+    def __repr__(self):
+        return str(self)
+
+#region ErrorType
 class ErrorType(Type):
     def __init__(self):
         Type.__init__(self, '<error>')
@@ -134,6 +161,7 @@ class ErrorType(Type):
     def __eq__(self, other):
         return isinstance(other, Type)
 
+#region VoidType
 class VoidType(Type):
     def __init__(self):
         Type.__init__(self, 'Object')
@@ -147,6 +175,7 @@ class VoidType(Type):
     def __eq__(self, other):
         return isinstance(other, VoidType)
     
+#region VectorType
 class VectorType(Type):
     def __init__(self, element_type):
         super().__init__('Vector')
@@ -169,12 +198,14 @@ class VectorType(Type):
     def __repr__(self):
         return str(self)
 
+#region IntType
 class IntType(Type):
     def __init__(self):
         Type.__init__(self, 'int')
 
     def __eq__(self, other):
         return other.name == self.name or isinstance(other, IntType)
+
 
 #region context
 class Context:
@@ -240,13 +271,34 @@ class Scope:
         self.parent = parent
         self.children = []
         self.index = 0 if parent is None else len(parent)
+        self.return_type=AutoType()
+        self.info=""
 
-    def print(self,tabs=0):
-        for l in self.locals:
-            print(tabs*"____",l.name)
-
+    def important(self):
+        if self.info!="": return True
+        if len(self.locals):return True 
+        if self.return_type.name!=AutoType().name:return True
         for c in self.children:
-            c.print(tabs+1)
+            if c.important:
+                return True
+        return False
+
+    def print(self,tabs=0,minimize=True):
+        if minimize and not self.important(): return
+        from termcolor import colored
+        rt=""
+        if self.return_type.name != AutoType().name:
+            rt=self.return_type.name
+        print(tabs*"    |"+"________"+colored(self.info,"magenta")+" "+colored(rt,"yellow"))
+            
+        for l in self.locals:
+            if l.type!=None:
+                print(tabs*"    |",l.name,colored(l.type.name,"blue"))
+            else:
+                print(tabs*"    |",l.name,colored("None","blue"))
+            
+        for c in self.children:
+            c.print(tabs+1,minimize)
 
     def __len__(self):
         return len(self.locals)
@@ -260,13 +312,23 @@ class Scope:
         info = VariableInfo(vname, vtype)
         self.locals.append(info)
         return info
+    
+    def modify_variable(self, vname, vtype):
+        var=self.find_variable(vname)
+        var.type=vtype
+        return var
 
     def find_variable(self, vname, index=None):
-        locals = self.locals if index is None else itt.islice(self.locals, index)
+        # locals = self.locals if index is None else itt.islice(self.locals, index)
+        locals = self.locals 
+
         try:
             return next(x for x in locals if x.name == vname)
         except StopIteration:
-            return self.parent.find_variable(vname, self.index) if self.parent is not None else None
+            if self.parent is not None:
+                return self.parent.find_variable(vname, self.index) 
+            else:
+                raise SemanticError(f'Variable "{vname}" not found in scope')
 
     def is_defined(self, vname):
         return self.find_variable(vname) is not None
