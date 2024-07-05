@@ -1,5 +1,5 @@
 import src.cmp.visitor as visitor
-from src.cmp.semantic import  SemanticError, ErrorType
+from src.cmp.semantic import  SemanticError, ErrorType, AutoType
 from src.grammar.hulk_ast import *
 from src.utils.errors import *
 
@@ -27,7 +27,7 @@ class type_filler:
     def visit(self, node: function_declaration_node):
         params_names, params_types = self.get_params_names_and_types(node)
         if node.return_type is None:
-            return_type = self.context.get_type('Object')
+            return_type = AutoType()
         else:
             try:
                 return_type = self.context.get_type(node.return_type)
@@ -68,7 +68,7 @@ class type_filler:
                 except SemanticError as e:
                     if param_type_name!=None:
                         self.errors.append(error("SEMANTIC ERROR",str(e),line=node.line,verbose=False))
-                    param_type = self.context.get_type('Object')
+                    param_type = AutoType()
                 params_types.append(param_type)
                 params_names.append(param_name)
 
@@ -118,7 +118,6 @@ class type_filler:
         if node.id.startswith('<error>'):
             return
         
-
         try:
             self.current_type = self.context.get_type(node.id)
         except SemanticError as e:
@@ -166,7 +165,7 @@ class type_filler:
         except SemanticError as e:
             if node.type_id!=None:
                 self.errors.append(error("SEMANTIC ERROR",str(e),line=node.line,verbose=False))
-            var_type = self.context.get_type('Object')
+            var_type = AutoType()
 
         try:
             self.current_type.define_attribute(node.id, var_type)
