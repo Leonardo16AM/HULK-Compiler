@@ -383,6 +383,33 @@ Object* function_rand(Object *a){
     return object_number((double)rand() / (double)RAND_MAX);
 }
 
+Object* object_Range(Object* min, Object* max){
+    Object *self=instantiate("Range");
+    insert(self->attributes,"parent",object_Object());
+    insert(self->attributes,"min",min);
+    insert(self->attributes,"max",max);
+    insert(self->attributes,"current",object_number(get_number(min)-1));
+    return self;
+}
+
+Object* object5_Range_next(Object* var_self){
+    Object* mi=get(var_self->attributes,"current");
+    mi=object_number(get_number(mi)+1);
+    insert(var_self->attributes,"current",mi);
+    if(get_number(mi)<get_number(get(var_self->attributes,"max"))){
+        return object_bool(1);
+    }else{
+        return object_bool(0);
+    }
+}
+
+Object* object5_Range_current(Object* var_self){
+   return get(var_self->attributes,"current");
+}
+
+Object* function_range(Object* mi, Object* ma){
+    return object_Range(mi,ma);
+}
 
 //Finish C_TOOLS
 

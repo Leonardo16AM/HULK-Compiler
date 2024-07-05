@@ -125,6 +125,9 @@ class ast_generator:
         self.cont=0
         list=[]
         self.Ob_funs_dic={}
+        self.Ob_funs_dic[0]=[]
+        self.Ob_funs_dic[0].append(("current","Range"))
+        self.Ob_funs_dic[0].append(("next","Range"))
         self.fun_def=[]
         for dec in node.dec_list:
             list.append(self.visit(dec,espectial))
@@ -609,7 +612,10 @@ class ast_generator:
 
     @visitor.when(for_node)
     def visit(self, node, espectial = None):
-        pass
+        while_body=let_node([variable_declaration_node(node.variable.id,None,property_call_node(variable_node("let"),function_call_node("current",[])))],node.body)
+        body=while_node(property_call_node(variable_node("let"),function_call_node("next",[])),while_body)
+        for_nod=let_node([variable_declaration_node("let",None,node.expr)],body)
+        return self.visit(for_nod)
 
     @visitor.when(vector_comprehension_node)
     def visit(self, node, espectial = None):
