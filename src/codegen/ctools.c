@@ -194,8 +194,8 @@ void destroyStringSet(StringSet *set) {
 
 
 typedef struct Class{
+    char* Name;
     struct Class *Parent;
-    StringSet functions;
 } Class;
 
 
@@ -205,31 +205,45 @@ typedef struct Class{
 struct Object{
     char* real_type;
     char* current_type;
-    Map attributes;
+    Map* attributes;
     int value;
     float rvalue;
     char* string_value;
 };
 
-Object* bool_object(int a){
+Object* instantiate(char* a){
+    Object *new_object = (Object* )malloc(sizeof(Object));
+    new_object->attributes=createMap();
+    new_object->real_type=a;
+    new_object->current_type=a;
+    return new_object;
+}
+
+Object* object_bool(int a){
     Object *new_object = (Object* )malloc(sizeof(Object));
     new_object->value=a;
-    new_object->real_type="bool";
-    new_object->current_type="bool";
+    new_object->real_type="Boolean";
+    new_object->current_type="Boolean";
 }
 
-Object* string_object(char* a){
+Object* object_string(char* a){
     Object *new_object = (Object* )malloc(sizeof(Object));
     new_object->string_value=a;
-    new_object->real_type="string";
-    new_object->current_type="string";
+    new_object->real_type="String";
+    new_object->current_type="String";
 }
 
-Object* number_object(float a){
+Object* object_number(float a){
     Object *new_object = (Object* )malloc(sizeof(Object));
     new_object->rvalue=a;
-    new_object->real_type="number";
-    new_object->current_type="number";
+    new_object->real_type="Number";
+    new_object->current_type="Number";
+}
+
+Object* object_Object(){
+    Object *new_object = (Object* )malloc(sizeof(Object));
+    new_object->real_type="Object";
+    new_object->current_type="Object";
 }
 
 int get_bool(Object* a){
@@ -243,15 +257,15 @@ float get_number(Object* a){
 
 char* get_string(Object *a){
     
-    if(a->real_type=="string"){
+    if(a->real_type=="String"){
         return a->string_value;
     }
-    if(a->real_type=="number"){
+    if(a->real_type=="Number"){
         char* cadena=(char*)malloc(20);
         snprintf(cadena,sizeof(cadena),"%f",a->rvalue);
         return cadena;
     }
-    if(a->real_type=="bool"){
+    if(a->real_type=="Boolean"){
         if(a->value==0){
             return "false";
         }else{
@@ -271,16 +285,22 @@ Object *concatenate(Object* a,Object* b){
     int len=strlen(sa)+strlen(sb)+3;
     char* ans=(char*)malloc(len);
     snprintf(ans,len,"%s%s",sa,sb);
-    return string_object(ans);
+    return object_string(ans);
+}
+
+Object* is_child_from_class(Object* a,char* type){
+    if(a->real_type==type)return object_bool(1);
+    if(a->real_type=="Object")return object_bool(0);
+    return is_child_from_class(get(a->attributes,"parent"),type);
 }
 
 int equals(Object *a,Object *b){
     if(a->real_type != b->real_type)return 0;
     if(a->rvalue != b->rvalue)return 0;
     if(a->value != b->value)return 0;
-    if(!strcmp(a->string_value,b->string_value))return 0;
-    Node* cura=a->attributes.head;
-    Node* curb=b->attributes.head;
+    if(strcmp(a->string_value,b->string_value))return 0;
+    Node* cura=a->attributes->head;
+    Node* curb=b->attributes->head;
     while(1){
         if(cura==NULL && curb==NULL)break;
         if(cura==NULL || curb==NULL)return 0;
@@ -293,32 +313,32 @@ int equals(Object *a,Object *b){
 
 
 Object* function_print(Object *a){
-    printf(get_string(a));
+    printf("%s\n",get_string(a));
     return a;
 }
 
 Object* function_sqrt(Object *a){
-    return number_object(sqrtf(get_number(a)));
+    return object_number(sqrtf(get_number(a)));
 }
 
 Object* function_sin(Object *a){
-    return number_object(sin(get_number(a)));
+    return object_number(sin(get_number(a)));
 }
 
 Object* function_cos(Object *a){
-    return number_object(cos(get_number(a)));
+    return object_number(cos(get_number(a)));
 }
 
 Object* function_exp(Object *a){
-    return number_object(exp(get_number(a)));
+    return object_number(exp(get_number(a)));
 }
 
 Object* function_log(Object *bas,Object* arg){
-    return number_object(log(get_number(arg))/log(get_number(bas)));
+    return object_number(log(get_number(arg))/log(get_number(bas)));
 }
 
 Object* function_rand(Object *a){
-    return number_object((double)rand() / (double)RAND_MAX);
+    return object_number((double)rand() / (double)RAND_MAX);
 }
 
 
