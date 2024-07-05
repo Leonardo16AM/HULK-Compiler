@@ -124,6 +124,10 @@ class c_modulo_node(c_expression_node):
         self.left = left
         self.right = right
 
+class c_pointer_node(c_expression_node):
+    def __init__(self, expr):
+        self.expr = expr
+       
 class c_negative_node(c_expression_node):
     def __init__(self, expr):
         self.expr = expr
@@ -155,8 +159,8 @@ class c_index_node(c_expression_node):
         self.id =id
 
 class c_attribute_call_node(c_expression_node):
-    def __init__(self, id, atrib):
-        self.id = id
+    def __init__(self, object, atrib):
+        self.object = object
         self.atrib = atrib
 
 class c_if_node(c_expression_node):
@@ -198,4 +202,9 @@ class c_scope_node(c_expression_node):
 class c_break_node(c_expression_node):
     def __init__(self):
         return
+    
+class c_pointer_to_node(c_expression_node):
+    def __init__(self,pointer,atrib):
+        self.pointer=pointer
+        self.atrib=atrib
         
