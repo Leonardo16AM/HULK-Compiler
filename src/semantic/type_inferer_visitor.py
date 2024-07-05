@@ -111,10 +111,9 @@ class type_inferer:
             node.scope.return_type=self.context.get_type(node.return_type)
         else:
             node.scope.return_type=body_type
-            retur_type=body_type
-
-        node.return_type
-
+            method.return_type=body_type
+            
+            
     def prototipes(self,clas,prot):
         if not  all(method.name in [me.name for me in clas.methods] for method in prot.methods): return False
         return True
@@ -138,6 +137,7 @@ class type_inferer:
         expr_type = self.visit(node.value)
         if var_type.name==AutoType().name:
             var_type=expr_type
+            scope.modify_variable(node.id,expr_type)
 
     #region expression_block
     @visitor.when(expression_block_node)
@@ -164,7 +164,7 @@ class type_inferer:
         if len(args_types) != len(function.param_types) :
             self.errors.append(error("SEMANTIC ERROR", f'Expected {len(function.param_types)} arguments but got {len(args_types)}', line=node.line, verbose=False))
             return ErrorType()
-
+        
         return function.return_type
 
     #region attribute_call
@@ -384,8 +384,6 @@ class type_inferer:
         index_type = self.visit(node.index)
         obj_type = self.visit(node.expr)
         if not isinstance(obj_type, VectorType):
-            # self.errors.append(error("SEMANTIC ERROR", f'Cannot index into non-vector type "{obj_type.name}"',
-            #                           line=node.line, verbose=False))
             return ErrorType()
 
         return obj_type.get_element_type()
@@ -436,11 +434,12 @@ class type_inferer:
             return ErrorType()
 
         try:
-            method = obj_type.get_method(node.func)
+            method = obj_type.get_method(node.func.id)
             return method.return_type
         except SemanticError as e:
-            self.errors.append(error("SEMANTIC ERROR", str(e), line=node.line, verbose=False))
-            return ErrorType()
+            if obj_type!=AutoType():
+                self.errors.append(error("SEMANTIC ERROR", str(e), line=node.line, verbose=False))
+            return AutoType()
 
     #region assignment_node
     @visitor.when(assignment_node)

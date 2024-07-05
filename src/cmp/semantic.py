@@ -106,9 +106,11 @@ class Type:
         return False
     
     def is_contravariant(self, other):
+        if other==AutoType() or self==AutoType():return True
         return other.conforms_to(self)
 
     def is_covariant(self, other):
+        if other==AutoType() or self==AutoType():return True
         return self.conforms_to(other)
 
     def __str__(self):
@@ -135,6 +137,9 @@ class AutoType(Type):
     def bypass(self):
         # Permite que AutoType se conforme a cualquier otro tipo
         return True
+    
+    def __eq__(self, other):
+        return isinstance(other, Type) and self.name == other.name
 
     def __str__(self):
         return 'type AutoType {}'

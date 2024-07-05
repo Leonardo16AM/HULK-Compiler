@@ -2,6 +2,7 @@ from src.semantic.type_finder_visitor import type_finder
 from src.semantic.type_filler_visitor import type_filler
 from src.semantic.var_finder_visitor import var_finder
 from src.semantic.type_inferer_visitor import type_inferer
+from src.semantic.type_checker_visitor import type_checker
 from termcolor import colored
 
 def semantic_check(ast,verbose=False):
@@ -26,9 +27,13 @@ def semantic_check(ast,verbose=False):
 
     
 
-    if verbose:errors.append("TYPE CHECKING")
+    if verbose:errors.append("INFERING TYPES")
     type_inf=type_inferer(context,errors,warnings)
     context,errors,warnings=type_inf.visit(ast)
+
+    if verbose:errors.append("CHECKING TYPES")
+    checker=type_checker(context,errors,warnings)
+    context,errors,warnings=checker.visit(ast)
 
 
     # print(colored(context,'cyan'))
