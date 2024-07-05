@@ -176,7 +176,15 @@ class code_generator:
     
     @visitor.when(c_if_node)
     def visit(self, node, tab = 0):
-        return f"if({self.visit(node.condition)}){'{'}\n {self.visit(node.body,tab+1)} {'}'}\n"
+        ans=""
+        for i in range(tab):
+            ans+="\t"
+        ans+=f"if({self.visit(node.condition)}){'{'}\n"
+        ans+=f"{self.visit(node.body,tab+1)}"
+        for i in range(tab):
+            ans+="\t"
+        ans+=f"{'}'}\n"
+        return ans 
     
     @visitor.when(c_if_else_node)
     def visit(self, node, tab = 0):
@@ -188,7 +196,10 @@ class code_generator:
         for i in range(tab):
             ans+="\t"
         ans+=f"{'}'}else{'{'}\n" 
-        ans+=f"{self.visit(node.body2,tab+1)} {'}'}\n"
+        ans+=f"{self.visit(node.body2,tab+1)}"
+        for i in range(tab):
+            ans+="\t"
+        ans+=f"{'}'}\n" 
         return ans
     
     @visitor.when(c_for_node)
@@ -201,7 +212,15 @@ class code_generator:
     
     @visitor.when(c_while_node)
     def visit(self, node, tab = 0):
-        return f"while({self.visit(node.condition)}){'{'}\n {self.visit(node.body,tab+1)} {'}'}\n"
+        ans=""
+        for i in range(tab):
+            ans+="\t"
+        ans+=f"while({self.visit(node.condition)}){'{'}\n"
+        ans+=f"{self.visit(node.body,tab+1)}"
+        for i in range(tab):
+            ans+="\t"
+        ans+=f"{'}'}\n" 
+        return ans
     
     @visitor.when(c_return_node)
     def visit(self, node, tab = 0):
@@ -209,7 +228,15 @@ class code_generator:
     
     @visitor.when(c_scope_node)
     def visit(self, node, tab = 0):
-        return f"{'{'}\n {self.visit(node.expr,tab+1)}{'}'}\n"
+        ans=""
+        for i in range(tab):
+            ans+="\t"
+        ans+=f"{'{'}\n"
+        ans+=f"{self.visit(node.expr,tab+1)}"
+        for i in range(tab):
+            ans+="\t"
+        ans+=f"{'}'}\n" 
+        return ans
     
     @visitor.when(c_break_node)
     def visit(self, node, tab = 0):

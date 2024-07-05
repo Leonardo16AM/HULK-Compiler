@@ -17,6 +17,15 @@ typedef struct Map {
     Node *head;
 } Map;
 
+struct Object{
+    char* real_type;
+    char* current_type;
+    Map* attributes;
+    int value;
+    float rvalue;
+    char* string_value;
+};
+
 // Función para crear un nuevo nodo
 Node *createNode(char *key, Object *value) {
     Node *newNode = (Node *)malloc(sizeof(Node));
@@ -41,11 +50,15 @@ Map *createMap() {
     return newMap;
 }
 
-// Función para insertar un par clave-valor en el mapa
-void insert(Map *map, char *key, Object *value) {
-    Node *newNode = createNode(key, value);
-    newNode->next = map->head;
-    map->head = newNode;
+Object *real_get(Map *map, char *key) {
+    Node *current = map->head;
+    while (current != NULL) {
+        if (strcmp(current->key, key) == 0) {
+            return current->value;
+        }
+        current = current->next;
+    }
+    return NULL;
 }
 
 // Función para buscar un valor por clave
@@ -57,7 +70,27 @@ Object *get(Map *map, char *key) {
         }
         current = current->next;
     }
-    return NULL; // Clave no encontrada
+    Object* par= real_get(map,"parent");
+    if(par==NULL)return NULL;
+    if(par->attributes==NULL)return NULL;
+    return get(par->attributes,key);
+}
+
+// Función para insertar un par clave-valor en el mapa
+void insert(Map *map, char *key, Object *value) {
+    Object* F;
+    if(key=="parent"){
+        F= real_get(map,key);
+    }else{
+        F= get(map, key);
+    }
+    if(F!=NULL){
+        *F=*value;
+        return;
+    }
+    Node *newNode = createNode(key, value);
+    newNode->next = map->head;
+    map->head = newNode;
 }
 
 // Función para eliminar un par clave-valor del mapa
@@ -202,18 +235,14 @@ typedef struct Class{
 
 
 
-struct Object{
-    char* real_type;
-    char* current_type;
-    Map* attributes;
-    int value;
-    float rvalue;
-    char* string_value;
-};
+
 
 Object* instantiate(char* a){
     Object *new_object = (Object* )malloc(sizeof(Object));
     new_object->attributes=createMap();
+    new_object->string_value=NULL;
+    new_object->value=0;
+    new_object->rvalue=0;
     new_object->real_type=a;
     new_object->current_type=a;
     return new_object;
@@ -221,20 +250,29 @@ Object* instantiate(char* a){
 
 Object* object_bool(int a){
     Object *new_object = (Object* )malloc(sizeof(Object));
+    new_object->attributes=NULL;
+    new_object->string_value=NULL;
     new_object->value=a;
+    new_object->rvalue=0;
     new_object->real_type="Boolean";
     new_object->current_type="Boolean";
 }
 
 Object* object_string(char* a){
     Object *new_object = (Object* )malloc(sizeof(Object));
+    new_object->attributes=NULL;
     new_object->string_value=a;
+    new_object->value=0;
+    new_object->rvalue=0;
     new_object->real_type="String";
     new_object->current_type="String";
 }
 
 Object* object_number(float a){
     Object *new_object = (Object* )malloc(sizeof(Object));
+    new_object->attributes=NULL;
+    new_object->string_value=NULL;
+    new_object->value=0;
     new_object->rvalue=a;
     new_object->real_type="Number";
     new_object->current_type="Number";
@@ -242,6 +280,10 @@ Object* object_number(float a){
 
 Object* object_Object(){
     Object *new_object = (Object* )malloc(sizeof(Object));
+    new_object->attributes=NULL;
+    new_object->string_value=NULL;
+    new_object->value=0;
+    new_object->rvalue=0;
     new_object->real_type="Object";
     new_object->current_type="Object";
 }
@@ -341,6 +383,33 @@ Object* function_rand(Object *a){
     return object_number((double)rand() / (double)RAND_MAX);
 }
 
+Object* object_Range(Object* min, Object* max){
+    Object *self=instantiate("Range");
+    insert(self->attributes,"parent",object_Object());
+    insert(self->attributes,"min",min);
+    insert(self->attributes,"max",max);
+    insert(self->attributes,"current",object_number(get_number(min)-1));
+    return self;
+}
+
+Object* object5_Range_next(Object* var_self){
+    Object* mi=get(var_self->attributes,"current");
+    mi=object_number(get_number(mi)+1);
+    insert(var_self->attributes,"current",mi);
+    if(get_number(mi)<get_number(get(var_self->attributes,"max"))){
+        return object_bool(1);
+    }else{
+        return object_bool(0);
+    }
+}
+
+Object* object5_Range_current(Object* var_self){
+   return get(var_self->attributes,"current");
+}
+
+Object* function_range(Object* mi, Object* ma){
+    return object_Range(mi,ma);
+}
 
 //Finish C_TOOLS
 
