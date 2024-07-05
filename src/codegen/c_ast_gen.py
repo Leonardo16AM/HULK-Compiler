@@ -96,6 +96,7 @@ class ast_generator:
         arglist=[]
         arglist.append(c_variable_node("obj"))
         argum.append(c_variable_declaration_node("Object *","obj"))
+        argum.append(c_variable_declaration_node("Object *","class"))
         argum.append(c_variable_declaration_node("char *","fun_name"))
         for i in range(args):
             argum.append(c_variable_declaration_node("Object *",f"arg_{i}"))
@@ -103,14 +104,15 @@ class ast_generator:
         body=[]
         for tup in Funcs_Objs:
             str="object"+f"{len(tup[1])}"+"_"+tup[1]+"_"+tup[0]
-            condition1=c_not_node(c_function_call_node("strcmp",[c_string_node("\""+tup[1]+"\""),c_pointer_to_node(c_variable_node("obj"),c_variable_node("real_type"))]))
+            condition1=c_not_node(c_function_call_node("strcmp",[c_string_node("\""+tup[1]+"\""),c_pointer_to_node(c_variable_node("class"),c_variable_node("real_type"))]))
             condition2=c_not_node(c_function_call_node("strcmp",[c_string_node("\""+tup[0]+"\""),c_variable_node("fun_name")]))
             condition=c_and_node(condition1,condition2)
             ifbody=c_statement_node(c_return_node(c_function_call_node(str,arglist)))
             body.append(c_if_node(condition,ifbody))
         retlist=list(arglist)
         retlist.insert(1,c_variable_node("fun_name"))
-        retlist[0]=c_function_call_node("get",[c_pointer_to_node(c_variable_node("obj"),c_variable_node("attributes")),c_string_node("\"parent\"")])
+        retlist.insert(1,c_variable_node("class"))
+        retlist[1]=c_function_call_node("get",[c_pointer_to_node(c_variable_node("class"),c_variable_node("attributes")),c_string_node("\"parent\"")])
         body.append(c_statement_node(c_return_node(c_function_call_node(fun_name,retlist))))
         return c_function_declaration_node(fun_name,argum,c_expression_block_node(body),"Object *")
 
@@ -279,7 +281,7 @@ class ast_generator:
         list.append(self.visit(node.expr,espectial))
         exp=self.cont
         self.cont+=1
-        list.append(c_statement_node(c_variable_declaration_node("Object *",f"Nod_{self.cont}")))
+        list.append(c_statement_node(c_variable_declaration_node("Object *",f"Nod_{self.cont}"))) 
         list.append(c_statement_node(c_assignment_node(c_variable_node(f"Nod_{self.cont}"),c_function_call_node(f"is_child_from_class",[c_variable_node(exp),"\""+node.type_id+"\""]))))
         return c_expression_block_node(list)
 
@@ -446,6 +448,7 @@ class ast_generator:
         fun_name=f"function_{node.id}"
         if espectial!=None and node.id=="base":
             nlist.append(c_function_call_node("get",[c_pointer_to_node(c_variable_node("Var_self"),c_variable_node("attributes")),c_string_node("\"parent\"")]))
+            nlist.append(c_function_call_node("get",[c_pointer_to_node(c_variable_node("Var_self"),c_variable_node("attributes")),c_string_node("\"parent\"")]))
             nlist.append(c_string_node("\""+espectial+"\""))
             fun_name=f"Interface_{len(node.args)}"
         for arg in node.args:
@@ -496,6 +499,7 @@ class ast_generator:
         obye=self.cont
         nodef=node.func
         nlist=[]
+        nlist.append(c_variable_node(f"Nod_{obye}"))
         nlist.append(c_variable_node(f"Nod_{obye}"))
         nlist.append(c_string_node("\""+nodef.id+"\""))
         fun_name=f"Interface_{len(nodef.args)}"
