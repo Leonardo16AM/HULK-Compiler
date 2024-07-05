@@ -2,7 +2,7 @@ from src.cmp.ast import *
 
 class node:
     line = '0'
-
+    scope = None
 
 class program_node(node):
     def __init__(self, dec_list, global_expr):

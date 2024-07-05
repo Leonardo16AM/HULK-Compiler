@@ -24,18 +24,21 @@ def semantic_check(ast,verbose=False):
     scope.define_variable("PI",context.get_type("Number"))
     scope.define_variable("E",context.get_type("Number"))
 
-    if verbose:print(colored(scope,'yellow'))
     
+
     if verbose:errors.append("TYPE CHECKING")
     type_inf=type_inferer(context,errors,warnings)
-    context,errors,warnings=type_inf.visit(ast,scope)
+    context,errors,warnings=type_inf.visit(ast)
 
-    if verbose:print(colored(context,'cyan'))
-    
+
+    # print(colored(context,'cyan'))
+    scope.print()
     
     for warning in warnings:
         print(warning)
     if errors:
+        errors=list(set(errors))
+
         for error in errors:
             print(error)
         return False
