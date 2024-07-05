@@ -17,6 +17,7 @@ class type_inferer:
             warnings = []
         self.context: Context = context
         self.current_type = None
+        self.current_function = None
         self.errors = errors
         self.warnings = warnings
         self.it=0
@@ -52,8 +53,10 @@ class type_inferer:
         
         if self.it==0:
             if len(node.params)==0 and node.parent!=None:
-                node.params=self.context.get_type(node.parent).attributes
-                for param in node.params:
+                params=self.context.get_type(node.parent).attributes
+                for param in params:
+                    node.params.append(variable_declaration_node(param.name,param.type.name if param.type!=AutoType() else None,None))
+                    node.args.append(variable_node(param.name))
                     try:
                         self.current_type.define_attribute(param, node.scope.find_variable(param).type)
                     except SemanticError as e:
@@ -99,6 +102,7 @@ class type_inferer:
     @visitor.when(function_declaration_node)
     def visit(self, node):
         scope=node.scope
+        self.current_function=node.id
         if node.id.startswith('<error>'):
             return node.return_type
         if self.current_type!=None:
@@ -112,6 +116,8 @@ class type_inferer:
         else:
             node.scope.return_type=body_type
             method.return_type=body_type
+        
+        self.current_function=None
             
             
     def prototipes(self,clas,prot):
@@ -153,8 +159,17 @@ class type_inferer:
     @visitor.when(function_call_node)
     def visit(self, node):
         args_types = [self.visit(arg) for arg in node.args]
+        
+        fun_name=node.id
+        curr='Function'
+        # if self.current_type!=None:
+        #     curr=self.current_type.name
+        if  node.id=="base":
+            curr=self.current_type.parent.name
+            fun_name=self.current_function
+
         try:
-            function = self.context.get_type('Function').get_method(node.id)
+            function = self.context.get_type(curr).get_method(fun_name)
         except SemanticError as e:
             self.errors.append(error("SEMANTIC ERROR", str(e), line=node.line, verbose=False))
             for arg in node.args:
@@ -162,7 +177,8 @@ class type_inferer:
             return ErrorType()
 
         if len(args_types) != len(function.param_types) :
-            self.errors.append(error("SEMANTIC ERROR", f'Expected {len(function.param_types)} arguments but got {len(args_types)}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'Expected {len(function.param_types)} arguments but got {len(args_types)}',
+                                      line=node.line, verbose=False))
             return ErrorType()
         
         return function.return_type

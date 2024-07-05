@@ -17,6 +17,7 @@ class type_checker:
             warnings = []
         self.context: Context = context
         self.current_type = None
+        self.current_function=None
         self.errors = errors
         self.warnings = warnings
         self.it=0
@@ -65,6 +66,7 @@ class type_checker:
     @visitor.when(function_declaration_node)
     def visit(self, node):
         scope=node.scope
+        self.current_function=node.id
         if node.id.startswith('<error>'):
             return node.return_type
         if self.current_type!=None:
@@ -81,7 +83,7 @@ class type_checker:
         if node.body and not node.scope.return_type.is_covariant(body_type):
             self.errors.append(error("SEMANTIC ERROR", 'Incompatible return type',
                                       line=node.line, verbose=False,warn=True))
-
+        self.current_function=None
     
     #region variable_declaration
     @visitor.when(variable_declaration_node)
@@ -117,14 +119,21 @@ class type_checker:
             expr_type = self.visit(expr)
         return expr_type
 
-
-
     #region function_call
     @visitor.when(function_call_node)
     def visit(self, node):
         args_types = [self.visit(arg) for arg in node.args]
+        
+        fun_name=node.id
+        curr='Function'
+        # if self.current_type!=None:
+        #     curr=self.current_type.name
+        if  node.id=="base":
+            curr=self.current_type.parent.name
+            fun_name=self.current_function
+
         try:
-            function = self.context.get_type('Function').get_method(node.id)
+            function = self.context.get_type(curr).get_method(fun_name)
         except SemanticError as e:
             self.errors.append(error("SEMANTIC ERROR", str(e), line=node.line, verbose=False))
             for arg in node.args:
@@ -132,7 +141,8 @@ class type_checker:
             return ErrorType()
 
         if len(args_types) != len(function.param_types) :
-            self.errors.append(error("SEMANTIC ERROR", f'Expected {len(function.param_types)} arguments but got {len(args_types)}', line=node.line, verbose=False))
+            self.errors.append(error("SEMANTIC ERROR", f'Expected {len(function.param_types)} arguments but got {len(args_types)}',
+                                      line=node.line, verbose=False))
             return ErrorType()
         
         for arg_type, param_type in zip(args_types, function.param_types):
@@ -140,8 +150,33 @@ class type_checker:
                 self.errors.append(error("SEMANTIC ERROR", f'Incompatible argument type "{arg_type.name}" for parameter type "{param_type.name}"',
                                           line=node.line, verbose=False,warn=True))
                 return ErrorType()
-
+        
         return function.return_type
+
+
+    # #region function_call
+    # @visitor.when(function_call_node)
+    # def visit(self, node):
+    #     args_types = [self.visit(arg) for arg in node.args]
+    #     try:
+    #         function = self.context.get_type('Function').get_method(node.id)
+    #     except SemanticError as e:
+    #         self.errors.append(error("SEMANTIC ERROR", str(e), line=node.line, verbose=False))
+    #         for arg in node.args:
+    #             self.visit(arg)
+    #         return ErrorType()
+
+    #     if len(args_types) != len(function.param_types) :
+    #         self.errors.append(error("SEMANTIC ERROR", f'Expected {len(function.param_types)} arguments but got {len(args_types)}', line=node.line, verbose=False))
+    #         return ErrorType()
+        
+    #     for arg_type, param_type in zip(args_types, function.param_types):
+    #         if not param_type.is_contravariant(arg_type):
+    #             self.errors.append(error("SEMANTIC ERROR", f'Incompatible argument type "{arg_type.name}" for parameter type "{param_type.name}"',
+    #                                       line=node.line, verbose=False,warn=True))
+    #             return ErrorType()
+
+    #     return function.return_type
 
     #region attribute_call
     @visitor.when(attribute_call_node)

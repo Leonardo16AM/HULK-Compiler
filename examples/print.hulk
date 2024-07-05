@@ -1,14 +1,24 @@
-function operate(x, y) {
-    print((x + y)@"\n");
-    print((x - y)@"\n");
-    print((x * y)@"\n");
-    print((x / y)@"\n");
+type Knight inherits Person {
+    name() => "Sir" @@ base();
+
+    wacala(){
+        self.say_my_name();
+    }
+}
+type Person(first, last) {
+    firstname = first;
+    lastname = last;
+
+    say_my_name(){print(self.name());}
+    name() => self.firstname @@ self.lastname;
+    hash() : Number {
+        5;
+    }
 }
 
-let a = 0 in {
-    print("Jorge"@@"Pichardo");
-    print("\n");
-    operate(10,2);
-    a := 2;
-    print(a**4);
+{
+    let leo=new Knight("Leonardo","Artiles") in{
+        leo.say_my_name();
+    };
+    
 };
