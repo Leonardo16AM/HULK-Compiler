@@ -154,23 +154,30 @@ class ast_generator:
         args=[]
         if espectial != None:
             args.append(c_variable_declaration_node("Object *",f"Var_self"))
-        for arg in node.params:
-            args.append(c_variable_declaration_node("Object *",f"Var_{arg.id}"))
+        list=[]
         if(espectial==None):
+            for arg in node.params:
+                args.append(c_variable_declaration_node("Object *",f"Var_{arg.id}"))
             fun_name=f"function_{node.id}"
             self.fun_def.append(c_function_declaration_node(fun_name,args,None,"Object*"))
             body=self.visit(node.body,espectial)
         else:
+            for arg in node.params:
+                args.append(c_variable_declaration_node("Object *",f"Arg_{arg.id}"))
+            for arg in node.params:
+                list.append(c_statement_node(c_variable_declaration_node("Object *",f"Var_{arg.id}")))
+                list.append(c_statement_node(c_assignment_node(c_variable_node(f"Var_{arg.id}"),c_variable_node(f"Arg_{arg.id}"))))
             fun_name=f"object{len(espectial)}_{espectial}_{node.id}"
             if(len(node.params) not in self.Ob_funs_dic):
                 self.Ob_funs_dic[len(node.params)]=[]
             self.Ob_funs_dic[len(node.params)].append((node.id,espectial))
             body=self.visit(node.body,node.id)
+            body=c_expression_block_node([c_expression_block_node(list),body])
         retvar=self.cont
         type="Object *"
         self.cont+=1
         ret=c_statement_node(c_return_node(c_variable_node(f"Nod_{retvar}")))
-        body=c_expression_block_node([body,ret])
+        body=c_scope_node(c_expression_block_node([body,ret]))
         return c_function_declaration_node(fun_name,args,body,type)
 
     @visitor.when(type_declaration_node)
