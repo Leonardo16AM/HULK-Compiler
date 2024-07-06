@@ -5,7 +5,7 @@ type Knight inherits Person {
         self.say_my_name();
     }
 }
-type Person(first, last) {
+type Person(first, last)  {
     firstname = first;
     lastname = last;
 
@@ -17,7 +17,7 @@ type Person(first, last) {
 }
 
 {
-    let leo=new Knight("Leonardo","Artiles") in{
+    let leo=new Person("Edian","Broche \n Castro") in{
         leo.say_my_name();
     };
     
