@@ -532,7 +532,7 @@ int main(){
 		Object * Nod_30;
 		Nod_30 = object_string("Broche \n Castro");
 		Object * Nod_31;
-		Nod_31 = object_Person(Nod_29, Nod_30);
+		Nod_31 = object_Knight(Nod_29, Nod_30);
 		Object * Nod_32;
 		Nod_32 = Nod_31;
 		Object * Var_leo;

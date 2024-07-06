@@ -17,7 +17,7 @@ type Person(first, last)  {
 }
 
 {
-    let leo=new Person("Edian","Broche \n Castro") in{
+    let leo=new Knight("Edian","Broche \n Castro") in{
         leo.say_my_name();
     };
     
