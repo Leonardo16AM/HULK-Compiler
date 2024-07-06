@@ -56,5 +56,7 @@ class ShiftReduceParser():
                     else:
                         error("PARSER ERROR","Not parseable",cursor)
             else:
-                error("PARSER ERROR","Invalid action","ShiftReduceParser")
+                on_state=[value[1] for value in self.table if value[0] == state ]
+                print(colored("Probably one of those tokens is missing: "+str(on_state),'red'))
+                error("PARSER ERROR",f'Invalid action: Previous to "{w[cursor]}"',"ShiftReduceParser")
         error("PARSER ERROR","Not parseable",cursor)
