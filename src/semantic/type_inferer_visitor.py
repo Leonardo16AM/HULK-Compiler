@@ -57,20 +57,19 @@ class type_inferer:
                 for param in params:
                     node.params.append(variable_declaration_node(param.name,param.type.name if param.type!=AutoType() else None,None))
                     node.args.append(variable_node(param.name))
-                    if param.name.startswith('IN') and param.name.endswith('ESP'):
-                        try:
-                            self.current_type.define_attribute('IN'+param.name+'ESP', node.scope.find_variable(param).type)
-                        except SemanticError as e:
-                            self.current_type.define_attribute('IN'+param.name+'ESP', AutoType())
+                    try:
+                        self.current_type.define_attribute('IN'+param.name+'ESP', node.scope.find_variable(param).type)
+                    except SemanticError as e:
+                        self.current_type.define_attribute('IN'+param.name+'ESP', AutoType())
             else:
                 for param in node.params:
                     add=True
                     if param.id in [at.name for at in self.current_type.attributes]:add=False
                     try:
-                        if add:self.current_type.define_attribute('IN'+param.id+'ESP',node.scope.find_variable(param.id).type)
+                        self.current_type.define_attribute('IN'+param.id+'ESP',node.scope.find_variable(param.id).type)
                     except SemanticError as e:
                         if add:self.current_type.define_attribute('IN'+param.id+'ESP', AutoType())
-        
+                    
 
         if self.current_type.parent:
             if type(self.current_type.parent) == ErrorType():
@@ -246,10 +245,13 @@ class type_inferer:
         except SemanticError as e:
             return ErrorType()
             
-        alats=ttype.all_attributes()
-        ttype_attr=[attr for attr in alats if (attr[0].name.startswith('IN') and attr[0].name.endswith('ESP'))]
+        alats=ttype.attributes
+        ttype_attr=[attr for attr in alats if (attr.name.startswith('IN') and attr.name.endswith('ESP'))]
         if len(args_types) != len(ttype_attr) and len(args_types)!=0:
-            self.errors.append(error("SEMANTIC ERROR", f'New: Expected {ttype_attr} arguments but got {len(args_types)} calling "{node.type_id}"', line=node.line, verbose=False))
+            
+            print('=============')
+            print(ttype_attr)
+            self.errors.append(error("SEMANTIC ERROR", f'New: Expected {len(ttype_attr)} arguments but got {len(args_types)} calling "{node.type_id}"', line=node.line, verbose=False))
             return ErrorType()
             
 

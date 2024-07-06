@@ -184,6 +184,9 @@ type wacamole{
 
     let p = new Knight("Phil", "Collins") in
         print(p.name());
+        
+    let p = new Person("Phil", "Collins") in
+        print(p.name());
     let p: Person = new Knight("Phil", "Collins") in print(p.name());
     let x: Number = 42 in print(x);
 
