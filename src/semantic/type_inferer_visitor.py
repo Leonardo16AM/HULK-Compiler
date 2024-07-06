@@ -244,8 +244,8 @@ class type_inferer:
             ttype = self.context.get_type(node.type_id)
             args_types = [self.visit(arg) for arg in node.args]
         except SemanticError as e:
-            # return ErrorType()
-            pass
+            return ErrorType()
+            
         alats=ttype.all_attributes()
         ttype_attr=[attr for attr in alats if (attr[0].name.startswith('IN') and attr[0].name.endswith('ESP'))]
         if len(args_types) != len(ttype_attr) and len(args_types)!=0:
