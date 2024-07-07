@@ -412,92 +412,65 @@ Object* function_range(Object* mi, Object* ma){
 }
 
 
+Object * Interface_1(Object * obj, Object * class, char * fun_name, Object * arg_0);
 Object * Interface_0(Object * obj, Object * class, char * fun_name);
-Object* object_Person(Object * Var_first, Object * Var_last);
-Object* object_Knight(Object * Var_firstname, Object * Var_lastname);
-Object * object6_Knight_name(Object * Var_self){
+Object* object_Point(Object * Var_x, Object * Var_y);
+Object * object5_Point_getX(Object * Var_self){
 	{
-		Object * Nod_3;
-		Nod_3 = object_string("Sir");
-		Object * Nod_4;
-		Nod_4 = object_string(" ");
-		Object * Nod_5;
-		Nod_5 = Interface_0(get((Var_self)->attributes, "parent"), get((Var_self)->attributes, "parent"), "name");
-		Object * Nod_6;
-		Nod_6 = concatenate(Nod_3, concatenate(Nod_4, Nod_5));
-		return Nod_6;
+		Object* Nod_5;
+		Nod_5 = get((Var_self)->attributes, "Var_x");
+		return Nod_5;
 	}
 }
-Object * object6_Knight_wacala(Object * Var_self){
+Object * object5_Point_getY(Object * Var_self){
 	{
-		Object * Nod_8;
-		Nod_8 = Var_self;
-		Object * Nod_9;
-		Nod_9 = Interface_0(Nod_8, Nod_8, "say_my_name");
+		Object* Nod_7;
+		Nod_7 = get((Var_self)->attributes, "Var_y");
+		return Nod_7;
+	}
+}
+Object * object5_Point_setX(Object * Var_self, Object * Arg_x){
+	{
+		Object * Var_x;
+		Var_x = Arg_x;
+		Object* Nod_9;
+		Nod_9 = get((Var_self)->attributes, "Var_x");
 		Object * Nod_10;
-		Nod_10 = Nod_9;
-		return Nod_10;
+		Nod_10 = Var_x;
+		( * Nod_9 ) = ( * Nod_10 );
+		Object * Nod_11;
+		Nod_11 = Nod_9;
+		return Nod_11;
 	}
 }
-Object* object_Knight(Object * Var_firstname, Object * Var_lastname){
+Object * object5_Point_setY(Object * Var_self, Object * Arg_y){
+	{
+		Object * Var_y;
+		Var_y = Arg_y;
+		Object* Nod_13;
+		Nod_13 = get((Var_self)->attributes, "Var_y");
+		Object * Nod_14;
+		Nod_14 = Var_y;
+		( * Nod_13 ) = ( * Nod_14 );
+		Object * Nod_15;
+		Nod_15 = Nod_13;
+		return Nod_15;
+	}
+}
+Object* object_Point(Object * Var_x, Object * Var_y){
 	Object* Var_self;
-	Var_self = instantiate("Knight");
-	Object * Nod_1;
-	Nod_1 = Var_firstname;
-	Object * Nod_2;
-	Nod_2 = Var_lastname;
-	insert((Var_self)->attributes, "parent", object_Person(Nod_1, Nod_2));
-	return Var_self;
-}
-Object * object6_Person_say_my_name(Object * Var_self){
-	{
-		Object * Nod_16;
-		Nod_16 = Var_self;
-		Object * Nod_17;
-		Nod_17 = Interface_0(Nod_16, Nod_16, "name");
-		Object * Nod_18;
-		Nod_18 = function_print(Nod_17);
-		Object * Nod_19;
-		Nod_19 = Nod_18;
-		return Nod_19;
-	}
-}
-Object * object6_Person_name(Object * Var_self){
-	{
-		Object* Nod_21;
-		Nod_21 = get((Var_self)->attributes, "Var_firstname");
-		Object * Nod_22;
-		Nod_22 = object_string(" ");
-		Object* Nod_23;
-		Nod_23 = get((Var_self)->attributes, "Var_lastname");
-		Object * Nod_24;
-		Nod_24 = concatenate(Nod_21, concatenate(Nod_22, Nod_23));
-		return Nod_24;
-	}
-}
-Object * object6_Person_hash(Object * Var_self){
-	{
-		Object * Nod_26;
-		Nod_26 = object_number(5);
-		Object * Nod_27;
-		Nod_27 = Nod_26;
-		return Nod_27;
-	}
-}
-Object* object_Person(Object * Var_first, Object * Var_last){
-	Object* Var_self;
-	Var_self = instantiate("Person");
+	Var_self = instantiate("Point");
 	insert((Var_self)->attributes, "parent", object_Object());
-	Object * Nod_12;
-	Nod_12 = Var_first;
-	Object * Nod_13;
-	Nod_13 = Nod_12;
-	insert((Var_self)->attributes, "Var_firstname", Nod_13);
-	Object * Nod_14;
-	Nod_14 = Var_last;
-	Object * Nod_15;
-	Nod_15 = Nod_14;
-	insert((Var_self)->attributes, "Var_lastname", Nod_15);
+	Object * Nod_1;
+	Nod_1 = Var_x;
+	Object * Nod_2;
+	Nod_2 = Nod_1;
+	insert((Var_self)->attributes, "Var_x", Nod_2);
+	Object * Nod_3;
+	Nod_3 = Var_y;
+	Object * Nod_4;
+	Nod_4 = Nod_3;
+	insert((Var_self)->attributes, "Var_y", Nod_4);
 	return Var_self;
 }
 Object * Interface_0(Object * obj, Object * class, char * fun_name){
@@ -507,45 +480,65 @@ Object * Interface_0(Object * obj, Object * class, char * fun_name){
 	if(( (! strcmp("Range", (class)->real_type)) && (! strcmp("next", fun_name)) )){
 		return object5_Range_next(obj);
 	}
-	if(( (! strcmp("Knight", (class)->real_type)) && (! strcmp("name", fun_name)) )){
-		return object6_Knight_name(obj);
+	if(( (! strcmp("Point", (class)->real_type)) && (! strcmp("getX", fun_name)) )){
+		return object5_Point_getX(obj);
 	}
-	if(( (! strcmp("Knight", (class)->real_type)) && (! strcmp("wacala", fun_name)) )){
-		return object6_Knight_wacala(obj);
-	}
-	if(( (! strcmp("Person", (class)->real_type)) && (! strcmp("say_my_name", fun_name)) )){
-		return object6_Person_say_my_name(obj);
-	}
-	if(( (! strcmp("Person", (class)->real_type)) && (! strcmp("name", fun_name)) )){
-		return object6_Person_name(obj);
-	}
-	if(( (! strcmp("Person", (class)->real_type)) && (! strcmp("hash", fun_name)) )){
-		return object6_Person_hash(obj);
+	if(( (! strcmp("Point", (class)->real_type)) && (! strcmp("getY", fun_name)) )){
+		return object5_Point_getY(obj);
 	}
 	return Interface_0(obj, get((class)->attributes, "parent"), fun_name);
 }
-int main(){
-	Object * Nod_36;
-	{
-		Object * Nod_29;
-		Nod_29 = object_string("Edian");
-		Object * Nod_30;
-		Nod_30 = object_string("Broche \n Castro");
-		Object * Nod_31;
-		Nod_31 = object_Person(Nod_29, Nod_30);
-		Object * Nod_32;
-		Nod_32 = Nod_31;
-		Object * Var_leo;
-		Var_leo = Nod_31;
-		Object * Nod_33;
-		Nod_33 = Var_leo;
-		Object * Nod_34;
-		Nod_34 = Interface_0(Nod_33, Nod_33, "say_my_name");
-		Object * Nod_35;
-		Nod_35 = Nod_34;
-		Nod_36 = Nod_32;
+Object * Interface_1(Object * obj, Object * class, char * fun_name, Object * arg_0){
+	if(( (! strcmp("Point", (class)->real_type)) && (! strcmp("setX", fun_name)) )){
+		return object5_Point_setX(obj, arg_0);
 	}
-	Object * Nod_37;
-	Nod_37 = Nod_36;
+	if(( (! strcmp("Point", (class)->real_type)) && (! strcmp("setY", fun_name)) )){
+		return object5_Point_setY(obj, arg_0);
+	}
+	return Interface_1(obj, get((class)->attributes, "parent"), fun_name, arg_0);
+}
+int main(){
+	Object * Nod_34;
+	{
+		Object * Nod_17;
+		Nod_17 = object_number(3);
+		Object * Nod_18;
+		Nod_18 = object_number(4);
+		Object * Nod_19;
+		Nod_19 = object_Point(Nod_17, Nod_18);
+		Object * Nod_20;
+		Nod_20 = Nod_19;
+		Object * Var_pt;
+		Var_pt = Nod_19;
+		Object * Nod_21;
+		Nod_21 = object_string("x: ");
+		Object * Nod_22;
+		Nod_22 = object_string("");
+		Object * Nod_23;
+		Nod_23 = Var_pt;
+		Object * Nod_24;
+		Nod_24 = Interface_0(Nod_23, Nod_23, "getX");
+		Object * Nod_25;
+		Nod_25 = concatenate(Nod_21, concatenate(Nod_22, Nod_24));
+		Object * Nod_26;
+		Nod_26 = object_string("");
+		Object * Nod_27;
+		Nod_27 = object_string("; y: ");
+		Object * Nod_28;
+		Nod_28 = concatenate(Nod_25, concatenate(Nod_26, Nod_27));
+		Object * Nod_29;
+		Nod_29 = object_string("");
+		Object * Nod_30;
+		Nod_30 = Var_pt;
+		Object * Nod_31;
+		Nod_31 = Interface_0(Nod_30, Nod_30, "getY");
+		Object * Nod_32;
+		Nod_32 = concatenate(Nod_28, concatenate(Nod_29, Nod_31));
+		Object * Nod_33;
+		Nod_33 = function_print(Nod_32);
+		Nod_34 = Nod_20;
+	}
+	Object * Nod_35;
+	Nod_35 = Nod_34;
 	return 0;
 }

@@ -159,7 +159,7 @@ class ErrorType(Type):
         return True
 
     def __eq__(self, other):
-        return isinstance(other, Type)
+        return isinstance(other, Type) and self.name == other.name
 
 #region VoidType
 class VoidType(Type):

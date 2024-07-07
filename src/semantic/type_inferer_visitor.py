@@ -248,18 +248,9 @@ class type_inferer:
         alats=ttype.attributes
         ttype_attr=[attr for attr in alats if (attr.name.startswith('IN') and attr.name.endswith('ESP'))]
         if len(args_types) != len(ttype_attr) and len(args_types)!=0:
-            
-            print('=============')
-            print(ttype_attr)
             self.errors.append(error("SEMANTIC ERROR", f'New: Expected {len(ttype_attr)} arguments but got {len(args_types)} calling "{node.type_id}"', line=node.line, verbose=False))
             return ErrorType()
             
-
-        for arg_type, attr in zip(args_types, ttype_attr):
-            try:
-                param_type=self.context.get_type(attr.name)
-            except Exception as e:
-                return ErrorType()    
         return ttype
 
     #region variable
