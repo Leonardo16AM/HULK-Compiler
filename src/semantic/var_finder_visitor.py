@@ -300,6 +300,6 @@ class var_finder:
     def visit(self, node: vector_comprehension_node, scope: Scope):
         node.scope = scope
         comprehension_scope = scope.create_child()
-        scope.parent.define_variable(node.variable.id, AutoType())
+        scope.define_variable(node.variable.id, AutoType())
         self.visit(node.expr, comprehension_scope)
         self.visit(node.vector, scope.create_child())

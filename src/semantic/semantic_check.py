@@ -45,6 +45,8 @@ def semantic_check(ast,verbose=False):
         errors=list(set(errors))
 
         for error in errors:
+            if "<error>" in error:
+                pass
             print(error)
         return False
     
