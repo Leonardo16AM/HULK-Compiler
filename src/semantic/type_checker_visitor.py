@@ -141,7 +141,7 @@ class type_checker:
             return ErrorType()
 
         if len(args_types) != len(function.param_types) :
-            self.errors.append(error("SEMANTIC ERROR", f'Expected {len(function.param_types)} arguments but got {len(args_types)}',
+            self.errors.append(error("SEMANTIC ERROR", f'Function: Expected {len(function.param_types)} arguments but got {len(args_types)}',
                                       line=node.line, verbose=False))
             return ErrorType()
         
@@ -222,7 +222,7 @@ class type_checker:
         scope=node.scope
         iterable_type = self.visit(node.expr)
         iterable_protocol = self.context.get_type('Iterable')
-        if not iterable_type.conforms_to(iterable_protocol):
+        if not iterable_type.conforms_to(iterable_protocol) and iterable_type.name!="Vector":
             self.errors.append(error("SEMANTIC ERROR", 'Expression must conform to Iterable protocol', 
                                      line=node.line, verbose=False,warn=True))
         
@@ -249,12 +249,16 @@ class type_checker:
             args_types = [self.visit(arg) for arg in node.args]
         except SemanticError as e:
             return ErrorType()
-
-        if len(args_types) != len(ttype.attributes) and len(args_types)!=0:
-            self.errors.append(error("SEMANTIC ERROR", f'Expected {len(ttype.attributes)} arguments but got {len(args_types)} calling "{node.type_id}"', line=node.line, verbose=False))
+        
+        alats=ttype.attributes
+        ttype_attr=[attr for attr in alats if (attr.name.startswith('IN') and attr.name.endswith('ESP'))]
+        
+        if len(args_types) != len(ttype_attr) and len(args_types)!=0:
+            self.errors.append(error("SEMANTIC ERROR", f'New: Expected {len(ttype_attr)} arguments but got {len(args_types)} calling "{node.type_id}"', line=node.line, verbose=False))
             return ErrorType()
+    
 
-        for arg_type, attr in zip(args_types, ttype.attributes):
+        for arg_type, attr in zip(args_types, ttype_attr):
             try:
                 param_type=self.context.get_type(attr.name)
                 if not arg_type.conforms_to(param_type):
@@ -262,7 +266,7 @@ class type_checker:
                                              line=node.line, verbose=False,warn=True))
                     return ErrorType()
             except Exception as e:
-                return ErrorType()    
+                pass
         return ttype
 
     #region variable
@@ -551,7 +555,7 @@ class type_checker:
             return ErrorType()
 
         try:
-            method = obj_type.get_method(node.func)
+            method = obj_type.get_method(node.func.id)
             return method.return_type
         except SemanticError as e:
             if obj_type!=AutoType():

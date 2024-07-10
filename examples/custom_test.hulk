@@ -184,9 +184,15 @@ type wacamole{
 
     let p = new Knight("Phil", "Collins") in
         print(p.name());
+        
+    let p = new Person("Phil", "Collins") in
+        print(p.name());
     let p: Person = new Knight("Phil", "Collins") in print(p.name());
     let x: Number = 42 in print(x);
 
+    let p = new Person("Phil", "Collins") in
+        let x: Number = fact(3)/print(p.name()) in print(x);
+    
     
     let x = new Superman() in
         print(
@@ -217,7 +223,9 @@ type wacamole{
     
     let squares = [x^2 || x in range(1,10)] in print(x);
 
-    let squares = [x^2 || x in range(1,10)] in for (x in squares) print(x);
+    let squares = [x^2 || x in range(1,10)] in {
+        for (x in squares) print(x);
+    };
     let x : Hashable = new Person() in print(x.hash());
     let x : Hashable = new Point(0,0) in print(x.hash());
 
