@@ -5,6 +5,48 @@ from src.parser.shift_reduce import ShiftReduceParser
 from src.cmp.pycompiler import EOF
 from src.utils.errors import *
 
+
+generate_iter = iter
+get_next = next
+is_instance = isinstance
+NoneType = None
+get_length = len
+enumerate_items = enumerate
+
+def evaluate_parse(productions, tokens):
+    if not productions or not tokens:
+        return
+    production_iter = generate_iter(productions)
+    token_iter = generate_iter(tokens)
+    result = evaluate(get_next(production_iter), production_iter, token_iter)
+    assert is_instance(get_next(token_iter).token_type, EOF)
+    return result
+
+def evaluate(production, production_iter, token_iter, inherited_value=NoneType):
+    non_terminal, rules = production
+    attributes = production.attributes
+    synthesized_values = [NoneType] * (get_length(rules) + 1)
+    inherited_values = [NoneType] * (get_length(rules) + 1)
+    inherited_values[0] = inherited_value
+    
+    for index, rule in enumerate_items(rules, 1):
+        if rule.IsTerminal:
+            assert inherited_values[index] is NoneType
+            synthesized_values[index] = get_next(token_iter).lex
+        else:
+            next_production = get_next(production_iter)
+            assert rule == next_production.Left
+            rule_attr = attributes[index]
+            if rule_attr is not NoneType:
+                inherited_values[index] = rule_attr(inherited_values, synthesized_values)
+            synthesized_values[index] = evaluate(next_production, production_iter, token_iter, inherited_values[index])
+    
+    root_attr = attributes[0]
+    return root_attr(inherited_values, synthesized_values) if root_attr is not NoneType else NoneType
+
+
+
+
 #region RegexParser
 class RegexParser:
     def __init__(self, grammar):

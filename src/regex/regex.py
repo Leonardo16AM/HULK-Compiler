@@ -1,10 +1,9 @@
 # Importaciones y configuración inicial
 from src.automaton.automaton_ops import *
-from src.cmp.tools.evaluation import evaluate_parse
 from src.regex.regex_nodes import *
 from src.regex.regex_grammar import regex_grammar
 from src.regex.regex_tokenizer import regex_tokenizer
-from src.regex.regex_parser import RegexParser
+from src.regex.regex_parser import RegexParser,evaluate_parse
 
 #region regex
 class regex:
