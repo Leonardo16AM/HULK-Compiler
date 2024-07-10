@@ -356,6 +356,22 @@ int equals(Object *a,Object *b){
 #define var_PI acos(-1)
 #define var_E exp(1)
 
+Object* copy(Object* a){
+    Object* b=(Object*)(malloc(sizeof(Object*)));
+    b->real_type=a->real_type;
+    b->rvalue=a->rvalue;
+    b->value=a->value;
+    strcpy(b->string_value,a->string_value);
+    b->attributes=createMap();
+    Node* cura=a->attributes->head;
+    while(1){
+        if(cura==NULL)break;
+        insert(b->attributes,cura->key,copy(cura->value));
+        cura=cura->next;
+    }
+    return b;
+}
+
 Object* function_print(Object *a){
     printf("%s\n",get_string(a));
     return a;
@@ -436,11 +452,15 @@ Object* object3_let_next(Object* Var_self){
 }
 
 Object* object3_let_current(Object* Var_self){
-   return get(Var_self->attributes,"current");
+   Object* meg=get(Var_self->attributes,"current");
+   int d=get_number(meg)+0.0000001;
+   char* f=(char*)malloc(33);
+    snprintf(f,33,"%d",d);
+    return get(Var_self->attributes,f);
 }
 
 Object* object3_let_reset(Object* Var_self){
-    Object* mi=object_number(0);
+    Object* mi=object_number(-1);
     insert(Var_self->attributes,"current",mi);
     return mi;
 }

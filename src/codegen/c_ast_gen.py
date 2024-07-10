@@ -658,4 +658,10 @@ class ast_generator:
 
     @visitor.when(vector_comprehension_node)
     def visit(self, node, espectial = None):
-        pass
+        inner_body=property_call_node(variable_node("in"),function_call_node("append",[node.expr]))
+        while_body=let_node([variable_declaration_node(node.variable.id,None,property_call_node(variable_node("let"),function_call_node("current",[])))],inner_body)
+        add=property_call_node(variable_node("let"),function_call_node("reset",[]))
+        body=while_node(property_call_node(variable_node("let"),function_call_node("next",[])),while_body)
+        first_let=let_node([variable_declaration_node("let",None,node.vector)],expression_block_node([add,body]))
+        vec_cohom=let_node([variable_declaration_node("in",None,vector_node([]))],first_let)
+        return self.visit(vec_cohom)
