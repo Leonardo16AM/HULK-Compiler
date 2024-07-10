@@ -1,5 +1,5 @@
 from src.cmp.pycompiler import EOF
-from src.cmp.tools.parsing import ShiftReduceParser
+from src.parser.shift_reduce import ShiftReduceParser
 
 def evaluate_reverse_parse(right_parse, operations, tokens):
     if not right_parse or not operations or not tokens:
