@@ -37,14 +37,14 @@ def semantic_check(ast,verbose=False):
     if verbose:scope.print()
     
     for warning in warnings:
-        if len(warning)<=0:
+        if len(warning)<=5:
             pass
         print(warning)
     if errors:
         errors=list(set(errors))
 
         for error in errors:
-            if len(error)<=0:
+            if len(error)<=5:
                 pass
             print(error)
         return False
