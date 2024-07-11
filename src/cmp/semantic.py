@@ -310,6 +310,9 @@ class Scope:
 
     def define_variable(self, vname, vtype):
         info = VariableInfo(vname, vtype)
+        if self.is_local(vname):
+            raise SemanticError(f'Variable "{vname}" already defined in scope')
+           
         self.locals.append(info)
         return info
     
