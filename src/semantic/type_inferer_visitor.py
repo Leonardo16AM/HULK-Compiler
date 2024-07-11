@@ -53,7 +53,12 @@ class type_inferer:
         
         if self.it==0:
             if len(node.params)==0 and node.parent!=None:
-                params=self.context.get_type(node.parent).attributes
+                try:
+                    params=self.context.get_type(node.parent).attributes
+                except SemanticError as e:
+                    self.errors.append(error("SEMANTIC ERROR", str(e),
+                                          line=node.line, verbose=False))
+                    return 
                 for param in params:
                     node.params.append(variable_declaration_node(param.name,param.type.name if param.type!=AutoType() else None,None))
                     node.args.append(variable_node(param.name))

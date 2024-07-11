@@ -18,3 +18,4 @@ src/cmp/tools/automata.py
 src/cmp/tools/evaluation.py
 src/cmp/tools/parsing.py
 src/cmp/tools/regex.py
+test.hulk

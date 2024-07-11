@@ -36,16 +36,17 @@ def semantic_check(ast,verbose=False):
     context,errors,warnings=checker.visit(ast)
 
 
-    # print(colored(context,'cyan'))
-    scope.print()
+    if verbose:scope.print()
     
     for warning in warnings:
+        if len(warning)<=0:
+            pass
         print(warning)
     if errors:
         errors=list(set(errors))
 
         for error in errors:
-            if "<error>" in error:
+            if len(error)<=0:
                 pass
             print(error)
         return False

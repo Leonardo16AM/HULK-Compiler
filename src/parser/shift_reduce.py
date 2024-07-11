@@ -24,7 +24,7 @@ class ShiftReduceParser():
 
         while cursor < len(w):
             state = stack[-1]
-            lookahead = w[cursor].Name
+            lookahead = w[cursor].token_type.Name
             if self.verbose:
                 if self.verbose:print(stack,colored('<---||--->','yellow'),w[cursor:])
 
@@ -58,5 +58,8 @@ class ShiftReduceParser():
             else:
                 on_state=[value[1] for value in self.table if value[0] == state ]
                 print(colored("Probably one of those tokens is missing: "+str(on_state),'red'))
-                error("PARSER ERROR",f'Invalid action: Previous to "{w[cursor]}"',"ShiftReduceParser")
+                nxt=''
+                for i in range(cursor,len(w)):
+                    nxt+=w[i].lex+" "
+                error("PARSER ERROR",f'Invalid action: Previous to "{nxt}"',"ShiftReduceParser",line=str(w[cursor].row))
         error("PARSER ERROR","Not parseable",cursor)
