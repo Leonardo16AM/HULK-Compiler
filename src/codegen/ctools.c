@@ -240,7 +240,7 @@ typedef struct Class{
 Object* instantiate(char* a){
     Object *new_object = (Object* )malloc(sizeof(Object));
     new_object->attributes=createMap();
-    new_object->string_value=NULL;
+    new_object->string_value="";
     new_object->value=0;
     new_object->rvalue=0;
     new_object->real_type=a;
@@ -251,7 +251,7 @@ Object* instantiate(char* a){
 Object* object_bool(int a){
     Object *new_object = (Object* )malloc(sizeof(Object));
     new_object->attributes=NULL;
-    new_object->string_value=NULL;
+    new_object->string_value="";
     new_object->value=a;
     new_object->rvalue=0;
     new_object->real_type="Boolean";
@@ -271,7 +271,7 @@ Object* object_string(char* a){
 Object* object_number(float a){
     Object *new_object = (Object* )malloc(sizeof(Object));
     new_object->attributes=NULL;
-    new_object->string_value=NULL;
+    new_object->string_value="";
     new_object->value=0;
     new_object->rvalue=a;
     new_object->real_type="Number";
@@ -281,7 +281,7 @@ Object* object_number(float a){
 Object* object_Object(){
     Object *new_object = (Object* )malloc(sizeof(Object));
     new_object->attributes=NULL;
-    new_object->string_value=NULL;
+    new_object->string_value="";
     new_object->value=0;
     new_object->rvalue=0;
     new_object->real_type="Object";
@@ -294,6 +294,16 @@ int get_bool(Object* a){
 
 float get_number(Object* a){
     return a->rvalue;
+}
+
+float modulo(float a , float b){
+    float s=a;
+    float m=b;
+    int is=s+0.5;
+    int im=m+0.5;
+    int id=is%im;
+    float d=id;
+    return d;
 }
 
 
@@ -338,9 +348,12 @@ Object* is_child_from_class(Object* a,char* type){
 
 int equals(Object *a,Object *b){
     if(a->real_type != b->real_type)return 0;
-    if(a->rvalue != b->rvalue)return 0;
+    if(a->rvalue - b->rvalue>1e-7 || a->rvalue - b->rvalue<-1e-7)return 0;
     if(a->value != b->value)return 0;
     if(strcmp(a->string_value,b->string_value))return 0;
+    printf("F");
+    if(a->attributes==NULL && b->attributes==NULL)return 1;
+    if(a->attributes!=NULL && b->attributes!=NULL){
     Node* cura=a->attributes->head;
     Node* curb=b->attributes->head;
     while(1){
@@ -349,6 +362,9 @@ int equals(Object *a,Object *b){
         if(!equals(cura->value,curb->value))return 0;
         cura=cura->next;
         curb=curb->next;
+    }
+    }else{
+        return 0;
     }
     return 1;
 }

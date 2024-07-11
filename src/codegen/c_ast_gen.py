@@ -25,7 +25,7 @@ class ast_generator:
         elif(op=="divide"):
             op_node=c_divide_node(l_as_number,r_as_number)
         elif(op=="modulo"):
-            op_node=c_modulo_node(l_as_number,r_as_number)
+            op_node=c_function_call_node("modulo",[l_as_number,r_as_number])
 
         list.append(c_statement_node(c_assignment_node(c_variable_node(f"Nod_{ans}"),c_function_call_node("object_number",[op_node]))))
 
