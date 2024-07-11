@@ -81,7 +81,11 @@ class var_finder:
             if node.type_id!=None:
                self.errors.append(error("TYPE ERROR", str(e)+f' On varible "{node.id}"', line=node.line, verbose=False))
             var_type = AutoType()
-        scope.define_variable(node.id, var_type)
+        try:
+            scope.define_variable(node.id, var_type)
+        except SemanticError as e:
+            self.errors.append(error("DECLARATION ERROR", str(e), line=node.line, verbose=False))
+                
         self.visit(node.value, scope.create_child())
 
     @visitor.when(expression_block_node)

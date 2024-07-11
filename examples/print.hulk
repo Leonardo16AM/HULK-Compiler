@@ -11,7 +11,7 @@ function fib(n){
 type Perro inherits Animal {
     name() => "Cannis " @@ base();
 }
-type Pers(firstname) {
+type Animal(firstname) {
     firstname = firstname; 
 
     name() => self.firstname;
@@ -28,4 +28,9 @@ type Pers(firstname) {
     
 
     print(fib(5));
+
+    let a = 3 in
+        let a = 2 * 4 in
+            print(a);
+
 };

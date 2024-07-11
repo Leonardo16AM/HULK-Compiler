@@ -12,12 +12,12 @@ def semantic_check(ast,verbose=False):
     context,errors=type_collector.visit(ast)
 
 
-    if verbose:errors.append("TYPE FILLING")
+    # if verbose:errors.append("TYPE FILLING")
     type_fill = type_filler(context, errors)
     context,errors=type_fill.visit(ast)
 
 
-    if verbose:errors.append("VAR COLLECTION")
+    # if verbose:errors.append("VAR COLLECTION")
     var_collector=var_finder(context,errors,warnings)
     scope=var_collector.visit(ast)
     
@@ -27,11 +27,9 @@ def semantic_check(ast,verbose=False):
 
     
 
-    if verbose:errors.append("INFERING TYPES")
     type_inf=type_inferer(context,errors,warnings)
     context,errors,warnings=type_inf.visit(ast)
 
-    if verbose:errors.append("CHECKING TYPES")
     checker=type_checker(context,errors,warnings)
     context,errors,warnings=checker.visit(ast)
 
@@ -53,6 +51,6 @@ def semantic_check(ast,verbose=False):
     
 
     
-    if verbose:print("NO SEMANTIC ERRORS FOUND")
+    # if verbose:print("NO SEMANTIC ERRORS FOUND")
     return True
 

@@ -32,7 +32,7 @@ def error(type, message, code="",line="", stop=True,verbose=True,warn=False):
         colored(type, 'yellow', attrs=['bold']) + ": "+message
     ]
     
-    if len(line) > 0:
+    if len(line) > 0 and line!="0":
         details.append("On line: "+line)
 
     if len(code) > 0:

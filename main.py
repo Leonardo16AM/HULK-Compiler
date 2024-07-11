@@ -55,7 +55,7 @@ def pipeline(file_path="examples/custom_test.hulk",verbose=True):
         print(formatter.visit(ast))
 
     if verbose:print(colored("========================================CHECKING_SEMATICS========================================",'blue'))
-    res=semantic_check(ast)
+    res=semantic_check(ast,verbose=verbose)
     # if not res:
     #     return
     if verbose:print(colored("========================================GERNERATING_CODE=========================================",'blue'))

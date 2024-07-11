@@ -252,7 +252,7 @@ class type_inferer:
             
         alats=ttype.attributes
         ttype_attr=[attr for attr in alats if (attr.name.startswith('IN') and attr.name.endswith('ESP'))]
-        if len(args_types) != len(ttype_attr) and len(args_types)!=0:
+        if len(args_types) != len(ttype_attr):
             self.errors.append(error("SEMANTIC ERROR", f'New: Expected {len(ttype_attr)} arguments but got {len(args_types)} calling "{node.type_id}"', line=node.line, verbose=False))
             return ErrorType()
             
