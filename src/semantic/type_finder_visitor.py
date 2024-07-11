@@ -56,7 +56,7 @@ class type_finder:
         exp_function.define_method('exp', ['value'], [number_type], number_type)
         
         log_function = self.context.get_type('Function')
-        log_function.define_method('log', ['value'], [number_type], number_type)
+        log_function.define_method('log', ['base','value'], [number_type,number_type], number_type)
         
         rand_function = self.context.get_type('Function')
         rand_function.define_method('rand', [], [], number_type)

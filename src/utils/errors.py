@@ -10,6 +10,9 @@ def clean_text(text):
     return text
 
 def error(type, message, code="",line="", stop=True,verbose=True,warn=False):
+    if "<error>" in message:
+        return ""
+    
     try:
         columns, _ = os.get_terminal_size()
     except OSError:
@@ -18,11 +21,12 @@ def error(type, message, code="",line="", stop=True,verbose=True,warn=False):
     color="red"
     if warn: color="yellow"
 
+    if len(code) > 40:
+        code = code[:37] + '...'
+
     message = clean_text(message)
     code = clean_text(code)
 
-    if len(code) > 40:
-        code = code[:47] + '...'
     
     details = [
         colored(type, 'yellow', attrs=['bold']) + ": "+message
