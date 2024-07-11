@@ -353,6 +353,24 @@ int equals(Object *a,Object *b){
     return 1;
 }
 
+#define Var_PI object_number(acos(-1))
+#define Var_E object_number(exp(1))
+
+Object* copy(Object* a){
+    Object* b=(Object*)(malloc(sizeof(Object*)));
+    b->real_type=a->real_type;
+    b->rvalue=a->rvalue;
+    b->value=a->value;
+    strcpy(b->string_value,a->string_value);
+    b->attributes=createMap();
+    Node* cura=a->attributes->head;
+    while(1){
+        if(cura==NULL)break;
+        insert(b->attributes,cura->key,copy(cura->value));
+        cura=cura->next;
+    }
+    return b;
+}
 
 Object* function_print(Object *a){
     printf("%s\n",get_string(a));
@@ -379,7 +397,7 @@ Object* function_log(Object *bas,Object* arg){
     return object_number(log(get_number(arg))/log(get_number(bas)));
 }
 
-Object* function_rand(Object *a){
+Object* function_rand(){
     return object_number((double)rand() / (double)RAND_MAX);
 }
 
@@ -392,24 +410,97 @@ Object* object_Range(Object* min, Object* max){
     return self;
 }
 
-Object* object5_Range_next(Object* var_self){
-    Object* mi=get(var_self->attributes,"current");
+Object* object5_Range_next(Object* Var_self){
+    Object* mi=get(Var_self->attributes,"current");
     mi=object_number(get_number(mi)+1);
-    insert(var_self->attributes,"current",mi);
-    if(get_number(mi)<get_number(get(var_self->attributes,"max"))){
+    insert(Var_self->attributes,"current",mi);
+    if(get_number(mi)<get_number(get(Var_self->attributes,"max"))){
         return object_bool(1);
     }else{
         return object_bool(0);
     }
 }
 
-Object* object5_Range_current(Object* var_self){
-   return get(var_self->attributes,"current");
+Object* object5_Range_reset(Object* Var_self){
+    Object* mi=get(Var_self->attributes,"min");
+    mi=object_number(get_number(mi)-1);
+    insert(Var_self->attributes,"current",mi);
+    return mi;
+}
+
+Object* object5_Range_current(Object* Var_self){
+   return get(Var_self->attributes,"current");
+}
+
+Object* object_let(){
+    Object *self=instantiate("let");
+    insert(self->attributes,"parent",object_Object());
+    insert(self->attributes,"size",object_bool(0));
+    insert(self->attributes,"current",object_number(0));
+    return self;
+}
+
+Object* object3_let_next(Object* Var_self){
+    Object* mi=get(Var_self->attributes,"current");
+    mi=object_number(get_number(mi)+1);
+    insert(Var_self->attributes,"current",mi);
+    if(get_number(mi)<get_bool(get(Var_self->attributes,"size"))){
+        return object_bool(1);
+    }else{
+        return object_bool(0);
+    }
+}
+
+Object* object3_let_current(Object* Var_self){
+   Object* meg=get(Var_self->attributes,"current");
+   int d=get_number(meg)+0.0000001;
+   char* f=(char*)malloc(33);
+    snprintf(f,33,"%d",d);
+    return get(Var_self->attributes,f);
+}
+
+Object* object3_let_reset(Object* Var_self){
+    Object* mi=object_number(-1);
+    insert(Var_self->attributes,"current",mi);
+    return mi;
+}
+
+Object* object3_let_append(Object* Var_self,Object* value){
+    Object* mi=get(Var_self->attributes,"size");
+    char* f=(char*)malloc(33);
+    snprintf(f,33,"%d",get_bool(mi));
+    insert(Var_self->attributes,f,value);
+    insert(Var_self->attributes,"size",object_bool(get_bool(mi)+1));
+    return value;
+}
+
+Object* object3_let_index(Object* Var_self,Object* index){
+    char* f=(char*)malloc(33);
+    snprintf(f,33,"%d",(int)(get_number(index)+1e-6));
+    return  get(Var_self->attributes,f);
+}
+
+Object* object3_let_size(Object* Var_self){
+    return  object_number( get_bool(get(Var_self->attributes,"size")));
+}
+
+Object* object6_string_index(Object* Var_self,Object* index){
+    int d=(int)(get_number(index)+1e-6);
+    char c=*(Var_self->string_value+d);
+    char* f=(char*)malloc(2);
+    snprintf(f,2,"%c",c);
+    return  object_string(f);
+}
+
+Object* object6_string_size(Object* Var_self){
+    return  object_number(strlen(Var_self->string_value));
 }
 
 Object* function_range(Object* mi, Object* ma){
     return object_Range(mi,ma);
 }
+
+
 
 //Finish C_TOOLS
 

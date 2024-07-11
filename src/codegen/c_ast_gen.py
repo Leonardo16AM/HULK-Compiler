@@ -126,11 +126,23 @@ class ast_generator:
         list=[]
         self.Ob_funs_dic={}
         self.Ob_funs_dic[0]=[]
+        self.Ob_funs_dic[1]=[]
         self.Ob_funs_dic[0].append(("current","Range"))
         self.Ob_funs_dic[0].append(("next","Range"))
+        self.Ob_funs_dic[0].append(("reset","Range"))
+        self.Ob_funs_dic[0].append(("current","let"))
+        self.Ob_funs_dic[0].append(("next","let"))
+        self.Ob_funs_dic[0].append(("reset","let"))
+        self.Ob_funs_dic[1].append(("index","let"))
+        self.Ob_funs_dic[1].append(("index","string"))
+        self.Ob_funs_dic[1].append(("append","let"))
+        self.Ob_funs_dic[0].append(("size","let"))
+        self.Ob_funs_dic[0].append(("size","string"))
+        
         self.fun_def=[]
         for dec in node.dec_list:
-            list.append(self.visit(dec,espectial))
+            if(not isinstance(dec,protocol_declaration_node)):
+                list.append(self.visit(dec,espectial))
         for fun in self.fun_def:
             list.insert(0,fun)
         for key in self.Ob_funs_dic:
@@ -292,7 +304,7 @@ class ast_generator:
         exp=self.cont
         self.cont+=1
         list.append(c_statement_node(c_variable_declaration_node("Object *",f"Nod_{self.cont}"))) 
-        list.append(c_statement_node(c_assignment_node(c_variable_node(f"Nod_{self.cont}"),c_function_call_node(f"is_child_from_class",[c_variable_node(exp),"\""+node.type_id+"\""]))))
+        list.append(c_statement_node(c_assignment_node(c_variable_node(f"Nod_{self.cont}"),c_function_call_node(f"is_child_from_class",[c_variable_node(f"Nod_{exp}"),c_string_node("\""+node.type_id+"\"")]))))
         return c_expression_block_node(list)
 
     @visitor.when(less_node)
@@ -497,11 +509,20 @@ class ast_generator:
     
     @visitor.when(index_node)
     def visit(self, node, espectial = None):
-        pass
+        list=[]
+        list.append(self.visit(node.expr))
+        ar=self.cont
+        list.append(self.visit(node.index))
+        ind=self.cont
+        self.cont+=1
+        list.append(c_statement_node(c_variable_declaration_node("Object *",f"Nod_{self.cont}")))
+        list.append(c_statement_node(c_assignment_node(c_variable_node(f"Nod_{self.cont}"),c_function_call_node("Interface_1",[c_variable_node(f"Nod_{ar}"),c_variable_node(f"Nod_{ar}"),c_string_node('"'+"index"+'"'),c_variable_node(f"Nod_{ind}")]))))
+        return c_expression_block_node(list)
+
 
     @visitor.when(as_node)
     def visit(self, node, espectial = None):
-        pass
+        return self.visit(node.expr)
 
     @visitor.when(property_call_node)
     def visit(self, node, espectial = None):
@@ -554,7 +575,18 @@ class ast_generator:
     
     @visitor.when(vector_node)
     def visit(self, node, espectial = None):
-        pass
+        list=[]
+        array_list=[]
+        for value in node.elements:
+            list.append(self.visit(value))
+            array_list.append(self.cont)
+        self.cont+=1
+        list.append(c_statement_node(c_variable_declaration_node("Object*",f"Nod_{self.cont}")))
+        list.append(c_statement_node(c_assignment_node(c_variable_node(f"Nod_{self.cont}"),c_function_call_node("object_let",[]))))
+        for value in array_list:
+            list.append(c_statement_node(c_function_call_node("Interface_1",[c_variable_node(f"Nod_{self.cont}"),c_variable_node(f"Nod_{self.cont}"),c_string_node('"'+"append"+'"'),c_variable_node(f"Nod_{value}")])))
+        return c_expression_block_node(list)
+
 
     @visitor.when(new_node)
     def visit(self, node, espectial = None):
@@ -615,15 +647,22 @@ class ast_generator:
         whilecond=c_int_node("1")
         list.append(c_while_node(whilecond,c_expression_block_node(whilebody)))
         return c_expression_block_node(list)
-        
+    
 
     @visitor.when(for_node)
     def visit(self, node, espectial = None):
         while_body=let_node([variable_declaration_node(node.variable.id,None,property_call_node(variable_node("let"),function_call_node("current",[])))],node.body)
+        add=property_call_node(variable_node("let"),function_call_node("reset",[]))
         body=while_node(property_call_node(variable_node("let"),function_call_node("next",[])),while_body)
-        for_nod=let_node([variable_declaration_node("let",None,node.expr)],body)
+        for_nod=let_node([variable_declaration_node("let",None,node.expr)],expression_block_node([add,body]))
         return self.visit(for_nod)
 
     @visitor.when(vector_comprehension_node)
     def visit(self, node, espectial = None):
-        pass
+        inner_body=property_call_node(variable_node("in"),function_call_node("append",[node.expr]))
+        while_body=let_node([variable_declaration_node(node.variable.id,None,property_call_node(variable_node("let"),function_call_node("current",[])))],inner_body)
+        add=property_call_node(variable_node("let"),function_call_node("reset",[]))
+        body=while_node(property_call_node(variable_node("let"),function_call_node("next",[])),while_body)
+        first_let=let_node([variable_declaration_node("let",None,node.vector)],expression_block_node([add,body]))
+        vec_cohom=let_node([variable_declaration_node("in",None,vector_node([]))],first_let)
+        return self.visit(vec_cohom)
