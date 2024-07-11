@@ -353,8 +353,8 @@ int equals(Object *a,Object *b){
     return 1;
 }
 
-#define var_PI acos(-1)
-#define var_E exp(1)
+#define Var_PI object_number(acos(-1))
+#define Var_E object_number(exp(1))
 
 Object* copy(Object* a){
     Object* b=(Object*)(malloc(sizeof(Object*)));
@@ -397,7 +397,7 @@ Object* function_log(Object *bas,Object* arg){
     return object_number(log(get_number(arg))/log(get_number(bas)));
 }
 
-Object* function_rand(Object *a){
+Object* function_rand(){
     return object_number((double)rand() / (double)RAND_MAX);
 }
 

@@ -141,7 +141,8 @@ class ast_generator:
         
         self.fun_def=[]
         for dec in node.dec_list:
-            list.append(self.visit(dec,espectial))
+            if(not isinstance(dec,protocol_declaration_node)):
+                list.append(self.visit(dec,espectial))
         for fun in self.fun_def:
             list.insert(0,fun)
         for key in self.Ob_funs_dic:
@@ -303,7 +304,7 @@ class ast_generator:
         exp=self.cont
         self.cont+=1
         list.append(c_statement_node(c_variable_declaration_node("Object *",f"Nod_{self.cont}"))) 
-        list.append(c_statement_node(c_assignment_node(c_variable_node(f"Nod_{self.cont}"),c_function_call_node(f"is_child_from_class",[c_variable_node(exp),"\""+node.type_id+"\""]))))
+        list.append(c_statement_node(c_assignment_node(c_variable_node(f"Nod_{self.cont}"),c_function_call_node(f"is_child_from_class",[c_variable_node(f"Nod_{exp}"),c_string_node("\""+node.type_id+"\"")]))))
         return c_expression_block_node(list)
 
     @visitor.when(less_node)
@@ -646,7 +647,7 @@ class ast_generator:
         whilecond=c_int_node("1")
         list.append(c_while_node(whilecond,c_expression_block_node(whilebody)))
         return c_expression_block_node(list)
-        
+    
 
     @visitor.when(for_node)
     def visit(self, node, espectial = None):
