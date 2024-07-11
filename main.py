@@ -47,7 +47,7 @@ def pipeline(file_path="examples/custom_test.hulk",verbose=True):
 
     if verbose:print("PARSING TOKENS")
     
-    parse,operations=parser([token.token_type for token in tokens],get_shift_reduce=True)
+    parse,operations=parser(tokens,get_shift_reduce=True)
     operations.pop()
     ast=evaluate_reverse_parse(parse,operations,tokens)
     if verbose:
